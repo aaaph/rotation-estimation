@@ -3,6 +3,7 @@ import json
 import socket
 
 import rclpy
+from rcl_interfaces.msg import ParameterValue
 from rclpy.node import Node
 from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import Imu
@@ -14,10 +15,12 @@ class SenseHatUdpImuNode(Node):
     def __init__(self):
         super().__init__("sensehat_udp_imu_node")
 
-        self.declare_parameter("host", "127.0.0.1")
-        self.declare_parameter("port", 8765)
-        self.declare_parameter("frame_id", "sensehat_link")
-        self.declare_parameter("topic", "/sensehat/imu_raw")
+        self.declare_parameter("host", ParameterValue(string_value="127.0.0.1"))
+        self.declare_parameter("port", ParameterValue(integer_value=8765))
+        self.declare_parameter("frame_id", ParameterValue(string_value="sensehat_link"))
+        self.declare_parameter(
+            "topic", ParameterValue(string_value="/sensehat/imu_raw")
+        )
 
         host = self.get_parameter("host").value
         port = int(self.get_parameter("port").value)

@@ -6,7 +6,7 @@ import json
 import socket
 import time
 
-import RTIMU  # pyright: ignore[reportMissingImports]
+import RTIMU  # pyright: ignore[reportMissingImports]  # ty:ignore[unresolved-import]
 
 
 def parse_args():
@@ -43,7 +43,6 @@ def main():
     print(f"Sending Sense HAT IMU UDP to {args.host}:{args.port}")
     print(f"RTIMU poll interval: {poll_interval_s:.6f}s")
 
-
     while True:
         if not imu.IMURead():
             time.sleep(poll_interval_s)
@@ -62,7 +61,7 @@ def main():
             time.sleep(poll_interval_s)
             continue
 
-        gyro = data["gyro"]    # rad/s
+        gyro = data["gyro"]  # rad/s
         accel = data["accel"]  # G
 
         packet = {
