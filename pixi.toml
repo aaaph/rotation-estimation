@@ -38,11 +38,11 @@ channels = ["robostack-kilted", "conda-forge"]
 
 [feature.mac-viz.tasks]
 rviz = "rviz2"
-zenohd = "ros2 run rmw_zenoh_cpp rmw_zenohd"
+zenohd = "./scripts/run-zenohd.sh"
 rerun = "rerun"
 
 [feature.pi-runtime.tasks]
-zenohd = "ros2 run rmw_zenoh_cpp rmw_zenohd"
+zenohd = "./scripts/run-zenohd.sh"
 
 [feature.mac-viz.dependencies]
 ros-kilted-ros-core = "*"

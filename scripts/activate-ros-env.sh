@@ -14,18 +14,18 @@ fi
 
 export RMW_IMPLEMENTATION="${RMW_IMPLEMENTATION:-rmw_zenoh_cpp}"
 
-if [[ -n "${ZENOH_CONFIG_OVERRIDE:-}" ]]; then
-  export ZENOH_CONFIG_OVERRIDE
-elif [[ -n "${ROS_ZENOH_ENDPOINT:-}" ]]; then
-  case "${ROS_ZENOH_MODE:-router}" in
+# Avoid leaking router-only overrides into ordinary ROS nodes and CLI commands.
+unset ZENOH_CONFIG_OVERRIDE
+
+if [[ -n "${ZENOH_SESSION_CONFIG_OVERRIDE:-}" ]]; then
+  export ZENOH_CONFIG_OVERRIDE="${ZENOH_SESSION_CONFIG_OVERRIDE}"
+elif [[ -n "${ROS_ZENOH_SESSION_ENDPOINT:-}" ]]; then
+  case "${ROS_ZENOH_SESSION_MODE:-client}" in
     client)
-      export ZENOH_CONFIG_OVERRIDE="mode=\"client\";connect/endpoints=[\"${ROS_ZENOH_ENDPOINT}\"]"
-      ;;
-    router | "")
-      export ZENOH_CONFIG_OVERRIDE="connect/endpoints=[\"${ROS_ZENOH_ENDPOINT}\"]"
+      export ZENOH_CONFIG_OVERRIDE="mode=\"client\";connect/endpoints=[\"${ROS_ZENOH_SESSION_ENDPOINT}\"]"
       ;;
     *)
-      echo "Unsupported ROS_ZENOH_MODE='${ROS_ZENOH_MODE}'. Use 'router' or 'client'." >&2
+      echo "Unsupported ROS_ZENOH_SESSION_MODE='${ROS_ZENOH_SESSION_MODE}'. Use 'client'." >&2
       exit 2
       ;;
   esac
