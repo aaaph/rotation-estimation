@@ -1,10 +1,33 @@
 [workspace]
 authors = ["Ivan Aphanasyev <nekaktotak2@gmail.com>"]
-channels = ["conda-forge"]
+channels = ["conda-forge", "robostack-kilted"]
 name = "rotation_estimation"
 platforms = ["osx-arm64"]
 version = "0.1.0"
 
 [tasks]
 
+[activation.env]
+RMW_IMPLEMENTATION = "rmw_zenoh_cpp"
+
 [dependencies]
+numpy = ">=2.5.1,<3"
+pytest = ">=9.1.1,<10"
+
+[feature.mac-viz]
+platforms = ["osx-arm64"]
+channels = ["robostack-kilted", "conda-forge"]
+
+[feature.mac-viz.tasks]
+rviz = "rviz2"
+zenohd = "ros2 run rmw_zenoh_cpp rmw_zenohd"
+rerun = "rerun"
+
+[feature.mac-viz.dependencies]
+ros-kilted-ros-core = "*"
+ros-kilted-rmw-zenoh-cpp = "*"
+ros-kilted-rviz2 = "*"
+rerun-sdk = "*"
+
+[environments]
+mac-viz = { features = ["mac-viz"], no-default-feature = true }
