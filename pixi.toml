@@ -55,17 +55,21 @@ ros-kilted-ros-core = "*"
 ros-kilted-rmw-zenoh-cpp = "*"
 ros-kilted-rviz2 = "*"
 rerun-sdk = "*"
-ruff = ">=0.15.20,<0.16"
-ty = ">=0.0.56,<0.0.57"
 
 [feature.pi-runtime.dependencies]
 ros-kilted-ros-core = "*"
 ros-kilted-rmw-zenoh-cpp = "*"
 ros-kilted-rclpy = ">=9.1.5,<10"
 ros-kilted-sensor-msgs = "*"
+
+[feature.dev-tools.dependencies]
 ruff = ">=0.15.20,<0.16"
 ty = ">=0.0.56,<0.0.57"
 
+
 [environments]
-mac-viz = { features = ["mac-viz"], no-default-feature = true }
-pi-runtime = { features = ["pi-runtime"], no-default-feature = true }
+mac-viz = { features = ["mac-viz", "dev-tools"], no-default-feature = true }
+pi-runtime = { features = [
+    "pi-runtime",
+    "dev-tools",
+], no-default-feature = true }
