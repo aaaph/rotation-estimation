@@ -43,6 +43,7 @@ rerun = "rerun"
 
 [feature.pi-runtime.tasks]
 zenohd = "./scripts/run-zenohd.sh"
+heartbeat_listener = "ros2 topic echo /m1_heartbeat"
 
 [feature.mac-viz.dependencies]
 ros-kilted-ros-core = "*"
