@@ -1,0 +1,11 @@
+{
+  "window.title": "MAC ${rootName}${separator}${activeEditorShort}",
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#0A9396",
+    "activityBar.foreground": "#FFFFFF",
+    "statusBar.background": "#005F73",
+    "statusBar.foreground": "#FFFFFF",
+    "titleBar.activeBackground": "#005F73",
+    "titleBar.activeForeground": "#FFFFFF"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "window.title": "PI5 ${rootName}${separator}${activeEditorShort}",
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#991B1B",
+    "activityBar.foreground": "#FFFFFF",
+    "statusBar.background": "#7F1D1D",
+    "statusBar.foreground": "#FFFFFF",
+    "titleBar.activeBackground": "#7F1D1D",
+    "titleBar.activeForeground": "#FFFFFF"
+  }
+}

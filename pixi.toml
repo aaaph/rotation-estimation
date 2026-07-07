@@ -6,6 +6,8 @@ platforms = ["osx-arm64", "linux-aarch64"]
 version = "0.1.0"
 
 [tasks]
+"ide:mac" = "./scripts/activate-ide-profile.sh mac"
+"ide:pi5" = "./scripts/activate-ide-profile.sh pi5"
 
 [activation.env]
 RMW_IMPLEMENTATION = "rmw_zenoh_cpp"
