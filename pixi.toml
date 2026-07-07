@@ -46,6 +46,8 @@ heartbeat_publisher = "ros2 topic pub /m1_heartbeat std_msgs/msg/Int32 '{data: 1
 [feature.pi-runtime.tasks]
 zenohd = "./scripts/run-zenohd.sh"
 heartbeat_listener = "ros2 topic echo /m1_heartbeat"
+sensehat_imu = "PYTHONPATH=src python -m rotation_estimation_nodes.sensehat_imu_node"
+sensehat_imu_mock = "PYTHONPATH=src python -m rotation_estimation_nodes.sensehat_imu_node --ros-args -p mock:=true"
 
 [feature.mac-viz.dependencies]
 ros-kilted-ros-core = "*"
@@ -56,6 +58,8 @@ rerun-sdk = "*"
 [feature.pi-runtime.dependencies]
 ros-kilted-ros-core = "*"
 ros-kilted-rmw-zenoh-cpp = "*"
+ros-kilted-rclpy = "*"
+ros-kilted-sensor-msgs = "*"
 
 [environments]
 mac-viz = { features = ["mac-viz"], no-default-feature = true }
