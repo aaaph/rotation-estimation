@@ -40,6 +40,8 @@ channels = ["robostack-kilted", "conda-forge"]
 rviz = "rviz2"
 zenohd = "./scripts/run-zenohd.sh"
 rerun = "rerun"
+heartbeat_listener = "ros2 topic echo /m1_heartbeat"
+heartbeat_publisher = "ros2 topic pub /m1_heartbeat std_msgs/msg/Int32 '{data: 1}' --rate 1"
 
 [feature.pi-runtime.tasks]
 zenohd = "./scripts/run-zenohd.sh"
