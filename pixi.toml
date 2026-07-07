@@ -12,6 +12,18 @@ version = "0.1.0"
 [activation.env]
 RMW_IMPLEMENTATION = "rmw_zenoh_cpp"
 
+[feature.mac-viz.activation.env]
+RMW_IMPLEMENTATION = "rmw_zenoh_cpp"
+
+[feature.mac-viz.activation]
+scripts = ["scripts/activate-ros-env.sh"]
+
+[feature.pi-runtime.activation.env]
+RMW_IMPLEMENTATION = "rmw_zenoh_cpp"
+
+[feature.pi-runtime.activation]
+scripts = ["scripts/activate-ros-env.sh"]
+
 [dependencies]
 numpy = ">=2.5.1,<3"
 pytest = ">=9.1.1,<10"
