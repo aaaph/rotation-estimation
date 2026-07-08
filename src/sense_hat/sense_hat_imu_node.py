@@ -1,76 +1,29 @@
-# src/sense_hat/sense_hat_imu_node.py
-import json
-import socket
-from collections.abc import Mapping
-from typing import cast
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, cast
 
 import rclpy
-from builtin_interfaces.msg import Time
-from rcl_interfaces.msg import ParameterValue
 from rclpy.node import Node
 from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import Imu
 
-G = 9.80665
-NumberLike = float | int | str
-MOCK_MODE_STATIONARY = "stationary"
-MOCK_MODE_YAW_ROTATION = "yaw_rotation"
-MOCK_MODES = {MOCK_MODE_STATIONARY, MOCK_MODE_YAW_ROTATION}
+from sense_hat.imu_strategy_factory import (
+    MOCK_MODE_YAW_ROTATION,
+    MOCK_MODES,
+    STRATEGY_MODE_UDP_READER,
+    ImuStrategyConfig,
+    create_imu_strategy,
+)
+
+if TYPE_CHECKING:
+    from rcl_interfaces.msg import ParameterValue
+
+    from sense_hat.imu_strategy_protocol import ImuStrategy
 
 
 def _parameter_default(value: object) -> ParameterValue:
     # rclpy accepts scalar defaults at runtime, but its overloads only expose ParameterValue.
     return cast("ParameterValue", value)
-
-
-def new_imu_message(stamp: Time, frame_id: str) -> Imu:
-    """Create a new IMU message."""
-    msg = Imu()
-    msg.header.stamp = stamp
-    msg.header.frame_id = frame_id
-    msg.orientation_covariance[0] = -1.0
-    return msg
-
-
-def imu_message_from_sample(
-    stamp: Time,
-    frame_id: str,
-    gyro: Mapping[str, NumberLike],
-    accel_g: Mapping[str, NumberLike],
-) -> Imu:
-    """Create an IMU message from a sample."""
-    msg = new_imu_message(stamp, frame_id)
-
-    msg.angular_velocity.x = float(gyro["x"])
-    msg.angular_velocity.y = float(gyro["y"])
-    msg.angular_velocity.z = float(gyro["z"])
-
-    msg.linear_acceleration.x = float(accel_g["x"]) * G
-    msg.linear_acceleration.y = float(accel_g["y"]) * G
-    msg.linear_acceleration.z = float(accel_g["z"]) * G
-
-    return msg
-
-
-def mock_imu_message(
-    stamp: Time,
-    frame_id: str,
-    mode: str,
-    angular_velocity_z: float,
-) -> Imu:
-    """Create a mock IMU message."""
-    if mode == MOCK_MODE_STATIONARY:
-        angular_velocity_z = 0.0
-    elif mode != MOCK_MODE_YAW_ROTATION:
-        msg = f"Unsupported mock_mode '{mode}'. Use one of {sorted(MOCK_MODES)}."
-        raise ValueError(msg)
-
-    return imu_message_from_sample(
-        stamp,
-        frame_id,
-        gyro={"x": 0.0, "y": 0.0, "z": angular_velocity_z},
-        accel_g={"x": 0.0, "y": 0.0, "z": 1.0},
-    )
 
 
 class SenseHatUdpImuNode(Node):
@@ -90,10 +43,12 @@ class SenseHatUdpImuNode(Node):
         self.declare_parameter("topic", _parameter_default("/sensehat/imu_raw"))
 
         mock = bool(self.get_parameter("mock").value)
-        host = self.get_parameter("host").value
+        host = str(self.get_parameter("host").value)
         port = int(self.get_parameter("port").value)
-        self.frame_id = self.get_parameter("frame_id").value
-        topic = self.get_parameter("topic").value
+        self.frame_id = str(self.get_parameter("frame_id").value)
+        topic = str(self.get_parameter("topic").value)
+        self.imu_strategy: ImuStrategy | None = None
+        self.drain_strategy = not mock
 
         self.pub = self.create_publisher(Imu, topic, qos_profile_sensor_data)
 
@@ -108,46 +63,49 @@ class SenseHatUdpImuNode(Node):
                 msg = f"Unsupported mock_mode '{self.mock_mode}'. Use one of {sorted(MOCK_MODES)}."
                 raise ValueError(msg)
 
-            self.timer = self.create_timer(1.0 / rate_hz, self.publish_mock)
-            self.get_logger().info(f"Publishing {self.mock_mode} mock IMU on {topic} at {rate_hz:.1f} Hz")
+            strategy_mode = self.mock_mode
+            timer_period_s = 1.0 / rate_hz
+            log_message = f"Publishing {self.mock_mode} mock IMU on {topic} at {rate_hz:.1f} Hz"
+        else:
+            strategy_mode = STRATEGY_MODE_UDP_READER
+            timer_period_s = 0.001
+            self.mock_angular_velocity_z = 0.0
+            self.mock_mode = ""
+            log_message = f"Listening UDP {host}:{port}, publishing {topic}"
+
+        self.imu_strategy = create_imu_strategy(
+            ImuStrategyConfig(
+                mode=strategy_mode,
+                host=host,
+                port=port,
+                frame_id=self.frame_id,
+                stamp_factory=lambda: self.get_clock().now().to_msg(),
+                angular_velocity_z=self.mock_angular_velocity_z,
+            )
+        )
+        self.timer = self.create_timer(timer_period_s, self.publish_from_strategy)
+        self.get_logger().info(log_message)
+
+    def publish_from_strategy(self) -> None:
+        """Publish IMU messages from the configured strategy."""
+        if self.imu_strategy is None:
             return
 
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.bind((host, port))
-        self.sock.settimeout(0.0)
-
-        self.timer = self.create_timer(0.001, self.poll)
-        self.get_logger().info(f"Listening UDP {host}:{port}, publishing {topic}")
-
-    def publish_mock(self) -> None:
-        """Publish a mock IMU message."""
-        msg = mock_imu_message(
-            self.get_clock().now().to_msg(),
-            self.frame_id,
-            self.mock_mode,
-            self.mock_angular_velocity_z,
-        )
-        self.pub.publish(msg)
-
-    def poll(self) -> None:
-        """Poll the UDP socket for IMU data."""
         while True:
-            try:
-                data, _addr = self.sock.recvfrom(4096)
-            except BlockingIOError:
+            msg = self.imu_strategy.get_imu_message()
+            if msg is None:
                 return
 
-            packet = json.loads(data.decode("utf-8"))
-            gyro = packet["gyro"]
-            accel = packet["accel"]
-
-            msg = imu_message_from_sample(
-                self.get_clock().now().to_msg(),
-                self.frame_id,
-                gyro,
-                accel,
-            )
             self.pub.publish(msg)
+            if not self.drain_strategy:
+                return
+
+    def destroy_node(self) -> None:
+        """Destroy the node and close the IMU strategy."""
+        if self.imu_strategy is not None:
+            self.imu_strategy.close()
+            self.imu_strategy = None
+        super().destroy_node()
 
 
 def main() -> None:
