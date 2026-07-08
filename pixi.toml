@@ -11,8 +11,16 @@ version = "0.1.0"
 zenohd = "./scripts/run-zenohd.sh"
 heartbeat_listener = "ros2 topic echo /m1_heartbeat"
 heartbeat_publisher = "ros2 topic pub /m1_heartbeat std_msgs/msg/Int32 '{data: 1}' --rate 1"
-lint = "ruff check . && ty check"
-test = "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest --verbose --color=yes --log-cli-level=WARNING src"
+format = { depends-on = ["format-py", "format-cpp"] }
+format-cpp = "python scripts/format_cpp.py"
+format-py = "ruff format . && ruff check --fix ."
+lint = { depends-on = ["lint-py", "lint-cpp"] }
+lint-cpp = { cmd = "python scripts/lint_cpp.py", depends-on = ["build"] }
+lint-py = "ruff check . && ty check --exclude 'src/my_custom_package/**'"
+test = { depends-on = ["test-py", "test-cpp"] }
+test-cpp = { cmd = "colcon test --packages-select my_cpp_package --event-handlers console_direct+", depends-on = ["build"] }
+test-py = "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest --verbose --color=yes --log-cli-level=WARNING src"
+build = "colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
 
 [tasks.sense_hat_imu_mock]
 args = [{ arg = "mode", default = "stationary" }]
@@ -25,6 +33,7 @@ RMW_IMPLEMENTATION = "rmw_zenoh_cpp"
 scripts = ["scripts/activate-ros-env.sh"]
 
 [dependencies]
+colcon-common-extensions = ">=0.3.0,<0.4"
 numpy = ">=2.5.1,<3"
 pytest = ">=9.1.1,<10"
 ros-kilted-rclpy = ">=9.1.5,<10"
@@ -33,6 +42,13 @@ ros-kilted-ros-core = "*"
 ros-kilted-sensor-msgs = "*"
 ruff = ">=0.15.20,<0.16"
 ty = ">=0.0.56,<0.0.57"
+ros-kilted-ament-cmake-auto = ">=2.7.5,<3"
+compilers = ">=1.11.0,<2"
+pkg-config = ">=0.29.2,<0.30"
+ninja = ">=1.13.2,<2"
+cmake = "<4"
+clang-format = ">=19.1.7,<23"
+clang-tools = ">=19.1.7,<23"
 
 [feature.mac-viz]
 platforms = ["osx-arm64"]

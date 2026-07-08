@@ -3,3 +3,4 @@ minversion = "9.0"
 testpaths = ["src", "tests"]
 pythonpath = ["src"]
 log_level = "INFO"
+norecursedirs = ["src/my_custom_package/test"]

@@ -9,6 +9,11 @@
 __pycache__/
 *.py[cod]
 
+# Colcon artifacts.
+build/
+install/
+log/
+
 # Local IDE profile; activate one of .vscode/settings.*.example.json.
 !.vscode/
 !.vscode/settings.*.example.json
