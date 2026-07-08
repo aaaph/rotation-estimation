@@ -26,7 +26,6 @@ scripts = ["scripts/activate-ros-env.sh"]
 
 [dependencies]
 numpy = ">=2.5.1,<3"
-pytest = ">=9.1.1,<10"
 
 [feature.mac-viz]
 platforms = ["osx-arm64"]
@@ -42,13 +41,16 @@ zenohd = "./scripts/run-zenohd.sh"
 rerun = "rerun"
 heartbeat_listener = "ros2 topic echo /m1_heartbeat"
 heartbeat_publisher = "ros2 topic pub /m1_heartbeat std_msgs/msg/Int32 '{data: 1}' --rate 1"
+sense_hat_imu_mock = "PYTHONPATH=src python -m sense_hat.sense_hat_imu_node --ros-args -p mock:=true"
+test_unit = "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 PYTHONPATH=src pytest src/sense_hat/tests/unit"
 
 [feature.pi-runtime.tasks]
 zenohd = "./scripts/run-zenohd.sh"
 heartbeat_listener = "ros2 topic echo /m1_heartbeat"
-sensehat_udp_reader = "/usr/bin/python3 src/sensehat_udp_sidecar/sensehat_udp_reader.py"
-sensehat_imu = "PYTHONPATH=src python -m rotation_estimation_nodes.sensehat_imu_node"
-sensehat_imu_mock = "PYTHONPATH=src python -m rotation_estimation_nodes.sensehat_imu_node --ros-args -p mock:=true"
+sense_hat_udp_reader = "/usr/bin/python3 src/sense_hat/sense_hat_udp_publisher.py"
+sense_hat_imu = "PYTHONPATH=src python -m sense_hat.sense_hat_imu_node"
+sense_hat_imu_mock = "PYTHONPATH=src python -m sense_hat.sense_hat_imu_node --ros-args -p mock:=true"
+test_unit = "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 PYTHONPATH=src pytest src/sense_hat/tests/unit"
 
 [feature.mac-viz.dependencies]
 ros-kilted-ros-core = "*"
@@ -65,7 +67,7 @@ ros-kilted-sensor-msgs = "*"
 [feature.dev-tools.dependencies]
 ruff = ">=0.15.20,<0.16"
 ty = ">=0.0.56,<0.0.57"
-
+pytest = ">=9.1.1,<10"
 
 [environments]
 mac-viz = { features = ["mac-viz", "dev-tools"], no-default-feature = true }

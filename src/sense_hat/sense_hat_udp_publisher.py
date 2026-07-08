@@ -1,12 +1,12 @@
 #!/usr/bin/python3
-# src/sensehat_udp_sidecar/sensehat_udp_reader.py
+# src/sense_hat/sense_hat_udp_publisher.py
 
 import argparse
 import json
 import socket
 import time
 
-import RTIMU  # pyright: ignore[reportMissingImports]  # ty:ignore[unresolved-import]
+import RTIMU  # pyright: ignore[reportMissingImports]  # ty: ignore[unresolved-import]
 
 
 def parse_args():
