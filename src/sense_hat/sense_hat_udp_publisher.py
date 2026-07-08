@@ -2,17 +2,24 @@
 # src/sense_hat/sense_hat_udp_publisher.py  # noqa: EXE001
 
 import argparse
+import importlib
 import json
-import pathlib
 import socket
 import time
+from collections.abc import Mapping
+from typing import Any, Protocol, cast
 
-import RTIMU  # pyright: ignore[reportMissingImports]  # ty: ignore[unresolved-import]
+NumberLike = float | int | str
 
 
-def default_settings_path() -> pathlib.Path:
-    """Return the default RTIMU settings base path."""
-    return pathlib.Path.home() / ".config" / "rotation_estimation" / "RTIMULib"
+class SenseHatDevice(Protocol):
+    """Minimal Sense HAT API used by the UDP publisher."""
+
+    def get_gyroscope_raw(self) -> Mapping[str, NumberLike]:
+        """Read raw gyroscope data."""
+
+    def get_accelerometer_raw(self) -> Mapping[str, NumberLike]:
+        """Read raw accelerometer data."""
 
 
 def parse_args() -> argparse.Namespace:
@@ -20,80 +27,89 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8765)
-    parser.add_argument("--settings", default=default_settings_path())
+    parser.add_argument("--settings", default=None, help=argparse.SUPPRESS)
     parser.add_argument("--rate-hz", type=float, default=0.0)
     return parser.parse_args()
+
+
+def create_sense_hat() -> SenseHatDevice:
+    """Create a Sense HAT device."""
+    try:
+        sense_hat_module = importlib.import_module("sense_hat")
+    except ModuleNotFoundError as exc:
+        msg = "python3-sense-hat is not installed in this interpreter"
+        raise RuntimeError(msg) from exc
+
+    sense_hat_class = getattr(sense_hat_module, "SenseHat", None)
+    if sense_hat_class is None:
+        msg = "imported sense_hat package does not expose SenseHat"
+        raise RuntimeError(msg)
+
+    sense: Any = sense_hat_class()
+    sense.set_imu_config(compass_enabled=False, gyro_enabled=True, accel_enabled=True)
+    return cast("SenseHatDevice", sense)
+
+
+def sleep_until_next_sample(started_at: float, min_period_s: float) -> None:
+    """Sleep until the configured sample period elapses."""
+    if min_period_s <= 0.0:
+        return
+
+    elapsed_s = time.monotonic() - started_at
+    remaining_s = min_period_s - elapsed_s
+    if remaining_s > 0.0:
+        time.sleep(remaining_s)
+
+
+def build_packet(
+    seq: int,
+    now: float,
+    gyro: Mapping[str, NumberLike],
+    accel: Mapping[str, NumberLike],
+) -> dict[str, object]:
+    """Build the UDP IMU packet."""
+    return {
+        "seq": seq,
+        "t": now,
+        "gyro": {
+            "x": float(gyro["x"]),
+            "y": float(gyro["y"]),
+            "z": float(gyro["z"]),
+        },
+        "accel": {
+            "x": float(accel["x"]),
+            "y": float(accel["y"]),
+            "z": float(accel["z"]),
+        },
+    }
 
 
 def main() -> None:
     """Run the SenseHat UDP publisher."""
     args = parse_args()
 
-    settings_path = pathlib.Path(args.settings).expanduser()
-    settings_path.parent.mkdir(parents=True, exist_ok=True)
-
-    settings = RTIMU.Settings(str(settings_path))
-    imu = RTIMU.RTIMU(settings)
-
-    if not imu.IMUInit():
-        raise RuntimeError("RTIMU init failed")
-
-    imu.setCompassEnable(False)
-    imu.setGyroEnable(True)
-    imu.setAccelEnable(True)
-
-    poll_interval_s = imu.IMUGetPollInterval() / 1000.0
     min_period_s = 1.0 / args.rate_hz if args.rate_hz > 0 else 0.0
+    sense = create_sense_hat()
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     target = (args.host, args.port)
 
     seq = 0
-    last_send = 0.0
 
     while True:
-        if not imu.IMURead():
-            time.sleep(poll_interval_s)
-            continue
-
+        started_at = time.monotonic()
+        gyro = sense.get_gyroscope_raw()  # rad/s
+        accel = sense.get_accelerometer_raw()  # G
         now = time.time()
-        monotonic_now = time.monotonic()
 
-        if min_period_s > 0 and monotonic_now - last_send < min_period_s:
-            time.sleep(poll_interval_s)
-            continue
-
-        data = imu.getIMUData()
-
-        if not data.get("gyroValid", False) or not data.get("accelValid", False):
-            time.sleep(poll_interval_s)
-            continue
-
-        gyro = data["gyro"]  # rad/s
-        accel = data["accel"]  # G
-
-        packet = {
-            "seq": seq,
-            "t": now,
-            "gyro": {
-                "x": float(gyro[0]),
-                "y": float(gyro[1]),
-                "z": float(gyro[2]),
-            },
-            "accel": {
-                "x": float(accel[0]),
-                "y": float(accel[1]),
-                "z": float(accel[2]),
-            },
-        }
+        packet = build_packet(seq, now, gyro, accel)
 
         payload = json.dumps(packet, separators=(",", ":")).encode("utf-8")
         sock.sendto(payload, target)
 
         seq += 1
-        last_send = monotonic_now
 
-        time.sleep(poll_interval_s)
+        sleep_until_next_sample(started_at, min_period_s)
 
 
 if __name__ == "__main__":
