@@ -48,7 +48,7 @@ rerun = "rerun"
 
 
 [feature.pi-runtime.tasks]
-sense_hat_udp_reader = "/usr/bin/python3 src/sense_hat/sense_hat_udp_publisher.py"
+sense_hat_udp_reader = "env -u PYTHONPATH -u PYTHONHOME /usr/bin/python3 src/sense_hat/sense_hat_udp_publisher.py"
 sense_hat_imu = "PYTHONPATH=src python -m sense_hat.sense_hat_imu_node"
 
 [feature.mac-viz.dependencies]

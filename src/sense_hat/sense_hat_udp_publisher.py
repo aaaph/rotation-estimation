@@ -4,9 +4,12 @@
 import argparse
 import importlib
 import json
+import os
+import pathlib
 import socket
+import sys
 import time
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from typing import Any, Protocol, cast
 
 NumberLike = float | int | str
@@ -32,8 +35,39 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def should_drop_system_import_path(path: str, repo_src: pathlib.Path) -> bool:
+    """Return whether a path should be hidden from system Python imports."""
+    if path == "":
+        return False
+
+    resolved = pathlib.Path(path).expanduser().resolve()
+    if resolved == repo_src:
+        return True
+
+    return ".pixi" in resolved.parts and ("site-packages" in resolved.parts or "dist-packages" in resolved.parts)
+
+
+def clean_system_import_paths(paths: Iterable[str], repo_src: pathlib.Path) -> list[str]:
+    """Remove Pixi Python and local repo package paths from system Python imports."""
+    return [path for path in paths if not should_drop_system_import_path(path, repo_src)]
+
+
+def prepare_system_sense_hat_import() -> None:
+    """Prevent system Python from importing Pixi Python packages."""
+    repo_src = pathlib.Path(__file__).resolve().parents[1]
+    sys.path[:] = clean_system_import_paths(sys.path, repo_src)
+
+    python_path = os.environ.get("PYTHONPATH")
+    if python_path is not None:
+        os.environ["PYTHONPATH"] = os.pathsep.join(
+            clean_system_import_paths(python_path.split(os.pathsep), repo_src)
+        )
+
+
 def create_sense_hat() -> SenseHatDevice:
     """Create a Sense HAT device."""
+    prepare_system_sense_hat_import()
+
     try:
         sense_hat_module = importlib.import_module("sense_hat")
     except ModuleNotFoundError as exc:
