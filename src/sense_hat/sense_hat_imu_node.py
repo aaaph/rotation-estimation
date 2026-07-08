@@ -4,8 +4,8 @@ import socket
 from collections.abc import Mapping
 from typing import cast
 
-from builtin_interfaces.msg import Time
 import rclpy
+from builtin_interfaces.msg import Time
 from rcl_interfaces.msg import ParameterValue
 from rclpy.node import Node
 from rclpy.qos import qos_profile_sensor_data
@@ -13,14 +13,18 @@ from sensor_msgs.msg import Imu
 
 G = 9.80665
 NumberLike = float | int | str
+MOCK_MODE_STATIONARY = "stationary"
+MOCK_MODE_YAW_ROTATION = "yaw_rotation"
+MOCK_MODES = {MOCK_MODE_STATIONARY, MOCK_MODE_YAW_ROTATION}
 
 
 def _parameter_default(value: object) -> ParameterValue:
     # rclpy accepts scalar defaults at runtime, but its overloads only expose ParameterValue.
-    return cast(ParameterValue, value)
+    return cast("ParameterValue", value)
 
 
 def new_imu_message(stamp: Time, frame_id: str) -> Imu:
+    """Create a new IMU message."""
     msg = Imu()
     msg.header.stamp = stamp
     msg.header.frame_id = frame_id
@@ -34,6 +38,7 @@ def imu_message_from_sample(
     gyro: Mapping[str, NumberLike],
     accel_g: Mapping[str, NumberLike],
 ) -> Imu:
+    """Create an IMU message from a sample."""
     msg = new_imu_message(stamp, frame_id)
 
     msg.angular_velocity.x = float(gyro["x"])
@@ -47,7 +52,19 @@ def imu_message_from_sample(
     return msg
 
 
-def mock_imu_message(stamp: Time, frame_id: str, angular_velocity_z: float) -> Imu:
+def mock_imu_message(
+    stamp: Time,
+    frame_id: str,
+    mode: str,
+    angular_velocity_z: float,
+) -> Imu:
+    """Create a mock IMU message."""
+    if mode == MOCK_MODE_STATIONARY:
+        angular_velocity_z = 0.0
+    elif mode != MOCK_MODE_YAW_ROTATION:
+        msg = f"Unsupported mock_mode '{mode}'. Use one of {sorted(MOCK_MODES)}."
+        raise ValueError(msg)
+
     return imu_message_from_sample(
         stamp,
         frame_id,
@@ -57,10 +74,14 @@ def mock_imu_message(stamp: Time, frame_id: str, angular_velocity_z: float) -> I
 
 
 class SenseHatUdpImuNode(Node):
-    def __init__(self):
+    """A node that publishes IMU data from a SenseHat UDP interface."""
+
+    def __init__(self) -> None:
+        """Initialize the node."""
         super().__init__("sensehat_udp_imu_node")
 
-        self.declare_parameter("mock", _parameter_default(False))
+        self.declare_parameter("mock", _parameter_default(value=False))
+        self.declare_parameter("mock_mode", _parameter_default(MOCK_MODE_YAW_ROTATION))
         self.declare_parameter("mock_rate_hz", _parameter_default(50.0))
         self.declare_parameter("mock_angular_velocity_z", _parameter_default(0.25))
         self.declare_parameter("host", _parameter_default("127.0.0.1"))
@@ -81,31 +102,35 @@ class SenseHatUdpImuNode(Node):
             if rate_hz <= 0.0:
                 raise ValueError("mock_rate_hz must be greater than zero")
 
-            self.mock_angular_velocity_z = float(
-                self.get_parameter("mock_angular_velocity_z").value
-            )
+            self.mock_angular_velocity_z = float(self.get_parameter("mock_angular_velocity_z").value)
+            self.mock_mode = str(self.get_parameter("mock_mode").value)
+            if self.mock_mode not in MOCK_MODES:
+                msg = f"Unsupported mock_mode '{self.mock_mode}'. Use one of {sorted(MOCK_MODES)}."
+                raise ValueError(msg)
+
             self.timer = self.create_timer(1.0 / rate_hz, self.publish_mock)
-            self.get_logger().info(
-                f"Publishing mock IMU on {topic} at {rate_hz:.1f} Hz"
-            )
+            self.get_logger().info(f"Publishing {self.mock_mode} mock IMU on {topic} at {rate_hz:.1f} Hz")
             return
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind((host, port))
-        self.sock.setblocking(False)
+        self.sock.settimeout(0.0)
 
         self.timer = self.create_timer(0.001, self.poll)
         self.get_logger().info(f"Listening UDP {host}:{port}, publishing {topic}")
 
-    def publish_mock(self):
+    def publish_mock(self) -> None:
+        """Publish a mock IMU message."""
         msg = mock_imu_message(
             self.get_clock().now().to_msg(),
             self.frame_id,
+            self.mock_mode,
             self.mock_angular_velocity_z,
         )
         self.pub.publish(msg)
 
-    def poll(self):
+    def poll(self) -> None:
+        """Poll the UDP socket for IMU data."""
         while True:
             try:
                 data, _addr = self.sock.recvfrom(4096)
@@ -125,11 +150,14 @@ class SenseHatUdpImuNode(Node):
             self.pub.publish(msg)
 
 
-def main():
+def main() -> None:
+    """Start the node."""
     rclpy.init()
     node = SenseHatUdpImuNode()
     try:
         rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
     finally:
         node.destroy_node()
         rclpy.shutdown()

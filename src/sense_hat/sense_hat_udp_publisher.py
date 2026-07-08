@@ -1,27 +1,38 @@
 #!/usr/bin/python3
-# src/sense_hat/sense_hat_udp_publisher.py
+# src/sense_hat/sense_hat_udp_publisher.py  # noqa: EXE001
 
 import argparse
 import json
+import pathlib
 import socket
 import time
 
 import RTIMU  # pyright: ignore[reportMissingImports]  # ty: ignore[unresolved-import]
 
 
-def parse_args():
+def default_settings_path() -> pathlib.Path:
+    """Return the default RTIMU settings base path."""
+    return pathlib.Path.home() / ".config" / "rotation_estimation" / "RTIMULib"
+
+
+def parse_args() -> argparse.Namespace:
+    """Parse the command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8765)
-    parser.add_argument("--settings", default="/tmp/rotation_estimation/RTIMULib")
+    parser.add_argument("--settings", default=default_settings_path())
     parser.add_argument("--rate-hz", type=float, default=0.0)
     return parser.parse_args()
 
 
-def main():
+def main() -> None:
+    """Run the SenseHat UDP publisher."""
     args = parse_args()
 
-    settings = RTIMU.Settings(args.settings)
+    settings_path = pathlib.Path(args.settings).expanduser()
+    settings_path.parent.mkdir(parents=True, exist_ok=True)
+
+    settings = RTIMU.Settings(str(settings_path))
     imu = RTIMU.RTIMU(settings)
 
     if not imu.IMUInit():
@@ -39,9 +50,6 @@ def main():
 
     seq = 0
     last_send = 0.0
-
-    print(f"Sending Sense HAT IMU UDP to {args.host}:{args.port}")
-    print(f"RTIMU poll interval: {poll_interval_s:.6f}s")
 
     while True:
         if not imu.IMURead():

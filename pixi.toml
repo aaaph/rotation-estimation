@@ -6,26 +6,33 @@ platforms = ["osx-arm64", "linux-aarch64"]
 version = "0.1.0"
 
 [tasks]
-"ide:mac" = "./scripts/activate-ide-profile.sh mac"
-"ide:pi5" = "./scripts/activate-ide-profile.sh pi5"
+"ide:mac" = { cmd = "./scripts/activate-ide-profile.sh mac", default-environment = "mac-viz" }
+"ide:pi5" = { cmd = "./scripts/activate-ide-profile.sh pi5", default-environment = "pi-runtime" }
+zenohd = "./scripts/run-zenohd.sh"
+heartbeat_listener = "ros2 topic echo /m1_heartbeat"
+heartbeat_publisher = "ros2 topic pub /m1_heartbeat std_msgs/msg/Int32 '{data: 1}' --rate 1"
+lint = "ruff check . && ty check"
+test = "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest --verbose --color=yes --log-cli-level=WARNING src"
+
+[tasks.sense_hat_imu_mock]
+args = [{ arg = "mode", default = "stationary" }]
+cmd = "PYTHONPATH=src python -m sense_hat.sense_hat_imu_node --ros-args -p mock:=true -p mock_mode:={{ mode }}"
 
 [activation.env]
 RMW_IMPLEMENTATION = "rmw_zenoh_cpp"
 
-[feature.mac-viz.activation.env]
-RMW_IMPLEMENTATION = "rmw_zenoh_cpp"
-
-[feature.mac-viz.activation]
-scripts = ["scripts/activate-ros-env.sh"]
-
-[feature.pi-runtime.activation.env]
-RMW_IMPLEMENTATION = "rmw_zenoh_cpp"
-
-[feature.pi-runtime.activation]
+[activation]
 scripts = ["scripts/activate-ros-env.sh"]
 
 [dependencies]
 numpy = ">=2.5.1,<3"
+pytest = ">=9.1.1,<10"
+ros-kilted-rclpy = ">=9.1.5,<10"
+ros-kilted-rmw-zenoh-cpp = "*"
+ros-kilted-ros-core = "*"
+ros-kilted-sensor-msgs = "*"
+ruff = ">=0.15.20,<0.16"
+ty = ">=0.0.56,<0.0.57"
 
 [feature.mac-viz]
 platforms = ["osx-arm64"]
@@ -37,41 +44,17 @@ channels = ["robostack-kilted", "conda-forge"]
 
 [feature.mac-viz.tasks]
 rviz = "rviz2"
-zenohd = "./scripts/run-zenohd.sh"
 rerun = "rerun"
-heartbeat_listener = "ros2 topic echo /m1_heartbeat"
-heartbeat_publisher = "ros2 topic pub /m1_heartbeat std_msgs/msg/Int32 '{data: 1}' --rate 1"
-sense_hat_imu_mock = "PYTHONPATH=src python -m sense_hat.sense_hat_imu_node --ros-args -p mock:=true"
-test_unit = "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 PYTHONPATH=src pytest src/sense_hat/tests/unit"
+
 
 [feature.pi-runtime.tasks]
-zenohd = "./scripts/run-zenohd.sh"
-heartbeat_listener = "ros2 topic echo /m1_heartbeat"
 sense_hat_udp_reader = "/usr/bin/python3 src/sense_hat/sense_hat_udp_publisher.py"
 sense_hat_imu = "PYTHONPATH=src python -m sense_hat.sense_hat_imu_node"
-sense_hat_imu_mock = "PYTHONPATH=src python -m sense_hat.sense_hat_imu_node --ros-args -p mock:=true"
-test_unit = "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 PYTHONPATH=src pytest src/sense_hat/tests/unit"
 
 [feature.mac-viz.dependencies]
-ros-kilted-ros-core = "*"
-ros-kilted-rmw-zenoh-cpp = "*"
 ros-kilted-rviz2 = "*"
 rerun-sdk = "*"
 
-[feature.pi-runtime.dependencies]
-ros-kilted-ros-core = "*"
-ros-kilted-rmw-zenoh-cpp = "*"
-ros-kilted-rclpy = ">=9.1.5,<10"
-ros-kilted-sensor-msgs = "*"
-
-[feature.dev-tools.dependencies]
-ruff = ">=0.15.20,<0.16"
-ty = ">=0.0.56,<0.0.57"
-pytest = ">=9.1.1,<10"
-
 [environments]
-mac-viz = { features = ["mac-viz", "dev-tools"], no-default-feature = true }
-pi-runtime = { features = [
-    "pi-runtime",
-    "dev-tools",
-], no-default-feature = true }
+mac-viz = { features = ["mac-viz"] }
+pi-runtime = { features = ["pi-runtime"] }
