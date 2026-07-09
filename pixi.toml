@@ -25,7 +25,8 @@ build = "colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMM
 
 [tasks.sense_hat_imu_mock]
 args = [{ arg = "mode", default = "stationary" }]
-cmd = "PYTHONPATH=src python -m sense_hat.sense_hat_imu_node --ros-args -p mock:=true -p mock_mode:={{ mode }}"
+cmd = "bash -lc 'source install/setup.bash && ros2 run sense_hat_bridge sense_hat_node --ros-args -p mock:=true -p mock_mode:={{ mode }}'"
+depends-on = ["build"]
 
 [activation.env]
 RMW_IMPLEMENTATION = "rmw_zenoh_cpp"
@@ -66,7 +67,7 @@ rerun = "rerun"
 
 [feature.pi-runtime.tasks]
 sense_hat_udp_reader = "env -u PYTHONPATH -u PYTHONHOME /usr/bin/python3 src/sense_hat/sense_hat_udp_publisher.py"
-sense_hat_imu = "PYTHONPATH=src python -m sense_hat.sense_hat_imu_node"
+sense_hat_imu = { cmd = "bash -lc 'source install/setup.bash && ros2 run sense_hat_bridge sense_hat_node'", depends-on = ["build"] }
 
 [feature.mac-viz.dependencies]
 ros-kilted-rviz2 = "*"
