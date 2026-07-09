@@ -11,15 +11,22 @@ version = "0.1.0"
 zenohd = "./scripts/run-zenohd.sh"
 heartbeat_listener = "ros2 topic echo /m1_heartbeat"
 heartbeat_publisher = "ros2 topic pub /m1_heartbeat std_msgs/msg/Int32 '{data: 1}' --rate 1"
-new-cpp-node = { args = ["package", "node"], cmd = "python scripts/create_cpp_node.py {{ package }} {{ node }}" }
+new-cpp-node = { args = [
+    "package",
+    "node",
+], cmd = "python scripts/create_cpp_node.py {{ package }} {{ node }}" }
 format = { depends-on = ["format-py", "format-cpp"] }
 format-cpp = "python scripts/format_cpp.py"
 format-py = "ruff format . && ruff check --fix ."
 lint = { depends-on = ["lint-py", "lint-cpp"] }
-lint-cpp = { cmd = "colcon test --event-handlers console_direct+ --ctest-args -L linter", depends-on = ["build"] }
+lint-cpp = { cmd = "colcon test --event-handlers console_direct+ --ctest-args -L linter", depends-on = [
+    "build",
+] }
 lint-py = "ruff check . && ty check --exclude 'src/my_custom_package/**'"
 test = { depends-on = ["test-py", "test-cpp"] }
-test-cpp = { cmd = "colcon test --event-handlers console_direct+ --ctest-args -LE linter", depends-on = ["build"] }
+test-cpp = { cmd = "colcon test --event-handlers console_direct+ --ctest-args -LE linter", depends-on = [
+    "build",
+] }
 test-py = "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest --verbose --color=yes --log-cli-level=WARNING src"
 check = "pixi run lint && pixi run test"
 build = "colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
@@ -64,17 +71,22 @@ platforms = ["linux-aarch64"]
 channels = ["robostack-kilted", "conda-forge"]
 
 [feature.dev-runtime.tasks]
+pre-commit-install = "pre-commit install"
+pre-commit-run = "pre-commit run --all-files"
 rviz = "rviz2"
 rerun = "rerun"
 
 
 [feature.edge-runtime.tasks]
 sense_hat_udp_reader = "env -u PYTHONPATH -u PYTHONHOME /usr/bin/python3 src/sense_hat/sense_hat_udp_publisher.py"
-sense_hat_imu = { cmd = "bash -lc 'source install/setup.bash && ros2 run sense_hat_bridge sense_hat_node'", depends-on = ["build"] }
+sense_hat_imu = { cmd = "bash -lc 'source install/setup.bash && ros2 run sense_hat_bridge sense_hat_node'", depends-on = [
+    "build",
+] }
 
 [feature.dev-runtime.dependencies]
 ros-kilted-rviz2 = "*"
 rerun-sdk = "*"
+pre-commit = ">=4.6.0,<5"
 
 [environments]
 dev-runtime = { features = ["dev-runtime"] }
