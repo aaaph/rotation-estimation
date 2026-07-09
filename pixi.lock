@@ -203,8 +203,12 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-action-msgs-2.3.1-np2py312h61f2ce4_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-actionlib-msgs-5.5.2-np2py312h61f2ce4_19.conda
+      - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-ament-clang-format-0.19.2-np2py312h61f2ce4_19.conda
+      - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-ament-clang-tidy-0.19.2-np2py312h61f2ce4_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-ament-cmake-2.7.5-np2py312h61f2ce4_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-ament-cmake-auto-2.7.5-np2py312h61f2ce4_19.conda
+      - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-ament-cmake-clang-format-0.19.2-np2py312h61f2ce4_19.conda
+      - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-ament-cmake-clang-tidy-0.19.2-np2py312h61f2ce4_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-ament-cmake-copyright-0.19.2-np2py312h61f2ce4_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-ament-cmake-core-2.7.5-np2py312h61f2ce4_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-ament-cmake-cppcheck-0.19.2-np2py312h61f2ce4_19.conda
@@ -551,8 +555,12 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.7-hbf9d68e_6.conda
       - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-action-msgs-2.3.1-np2py312h50b1e4c_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-actionlib-msgs-5.5.2-np2py312h50b1e4c_19.conda
+      - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-ament-clang-format-0.19.2-np2py312h50b1e4c_19.conda
+      - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-ament-clang-tidy-0.19.2-np2py312h50b1e4c_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-ament-cmake-2.7.5-np2py312h50b1e4c_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-ament-cmake-auto-2.7.5-np2py312h50b1e4c_19.conda
+      - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-ament-cmake-clang-format-0.19.2-np2py312h50b1e4c_19.conda
+      - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-ament-cmake-clang-tidy-0.19.2-np2py312h50b1e4c_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-ament-cmake-copyright-0.19.2-np2py312h50b1e4c_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-ament-cmake-core-2.7.5-np2py312h50b1e4c_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-ament-cmake-cppcheck-0.19.2-np2py312h50b1e4c_19.conda
@@ -1071,8 +1079,12 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zziplib-0.13.69-h57f5043_2.conda
       - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-action-msgs-2.3.1-np2py312h50b1e4c_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-actionlib-msgs-5.5.2-np2py312h50b1e4c_19.conda
+      - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-ament-clang-format-0.19.2-np2py312h50b1e4c_19.conda
+      - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-ament-clang-tidy-0.19.2-np2py312h50b1e4c_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-ament-cmake-2.7.5-np2py312h50b1e4c_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-ament-cmake-auto-2.7.5-np2py312h50b1e4c_19.conda
+      - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-ament-cmake-clang-format-0.19.2-np2py312h50b1e4c_19.conda
+      - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-ament-cmake-clang-tidy-0.19.2-np2py312h50b1e4c_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-ament-cmake-copyright-0.19.2-np2py312h50b1e4c_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-ament-cmake-core-2.7.5-np2py312h50b1e4c_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-ament-cmake-cppcheck-0.19.2-np2py312h50b1e4c_19.conda
@@ -1462,8 +1474,12 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-action-msgs-2.3.1-np2py312h61f2ce4_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-actionlib-msgs-5.5.2-np2py312h61f2ce4_19.conda
+      - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-ament-clang-format-0.19.2-np2py312h61f2ce4_19.conda
+      - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-ament-clang-tidy-0.19.2-np2py312h61f2ce4_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-ament-cmake-2.7.5-np2py312h61f2ce4_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-ament-cmake-auto-2.7.5-np2py312h61f2ce4_19.conda
+      - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-ament-cmake-clang-format-0.19.2-np2py312h61f2ce4_19.conda
+      - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-ament-cmake-clang-tidy-0.19.2-np2py312h61f2ce4_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-ament-cmake-copyright-0.19.2-np2py312h61f2ce4_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-ament-cmake-core-2.7.5-np2py312h61f2ce4_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-ament-cmake-cppcheck-0.19.2-np2py312h61f2ce4_19.conda
@@ -8196,6 +8212,40 @@ packages:
   license: Apache-2.0
   size: 116715
   timestamp: 1779607174611
+- conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-ament-clang-format-0.19.2-np2py312h61f2ce4_19.conda
+  sha256: 3e27260e46f98d103e2a982c9244223366af17770ffcfa6615a4fb2d95273347
+  md5: e0c6bc020b1c28f78d067e734925e3b4
+  depends:
+  - clang-format
+  - python
+  - pyyaml
+  - ros-kilted-ros-workspace
+  - ros2-distro-mutex 0.15.* kilted_*
+  - libgcc >=14
+  - libstdcxx >=14
+  - python_abi 3.12.* *_cp312
+  - numpy >=1.23,<3
+  - ros2-distro-mutex >=0.15.0,<0.16.0a0
+  license: Apache-2.0
+  size: 30452
+  timestamp: 1779605207582
+- conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-ament-clang-tidy-0.19.2-np2py312h61f2ce4_19.conda
+  sha256: e0538739d91684747592386389d26fec5b0ad452de68fa827d6aa56ed1456741
+  md5: 1cabeac04213da06775e1da0c3c52b1a
+  depends:
+  - clang-tools
+  - python
+  - pyyaml
+  - ros-kilted-ros-workspace
+  - ros2-distro-mutex 0.15.* kilted_*
+  - libstdcxx >=14
+  - libgcc >=14
+  - python_abi 3.12.* *_cp312
+  - numpy >=1.23,<3
+  - ros2-distro-mutex >=0.15.0,<0.16.0a0
+  license: Apache-2.0
+  size: 30616
+  timestamp: 1779605235662
 - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-ament-cmake-2.7.5-np2py312h61f2ce4_19.conda
   sha256: ee1ff1bc5e78a498f3e42ce6210756c24f380cf892c73929f6d8b56b9fba1ef2
   md5: f0f4eac71284d7ca217bda1b7351d3e7
@@ -8244,6 +8294,40 @@ packages:
   license: Apache-2.0
   size: 27852
   timestamp: 1779605200209
+- conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-ament-cmake-clang-format-0.19.2-np2py312h61f2ce4_19.conda
+  sha256: 0e4c9d89d69594f2e905ab4644faa20a4af873ebf0be6bae64919278d4cdad30
+  md5: 5485d658b9722ad14f069378ba8cd984
+  depends:
+  - python
+  - ros-kilted-ament-clang-format
+  - ros-kilted-ament-cmake-test
+  - ros-kilted-ros-workspace
+  - ros2-distro-mutex 0.15.* kilted_*
+  - libgcc >=14
+  - libstdcxx >=14
+  - python_abi 3.12.* *_cp312
+  - ros2-distro-mutex >=0.15.0,<0.16.0a0
+  - numpy >=1.23,<3
+  license: Apache-2.0
+  size: 23561
+  timestamp: 1779605490297
+- conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-ament-cmake-clang-tidy-0.19.2-np2py312h61f2ce4_19.conda
+  sha256: 1a01347674ebf5d6daa319a4364c57296d250adbd0438c76c7cef2983509c0ad
+  md5: 02fbb1b603460de063e23bd13af0efdf
+  depends:
+  - python
+  - ros-kilted-ament-clang-tidy
+  - ros-kilted-ament-cmake-test
+  - ros-kilted-ros-workspace
+  - ros2-distro-mutex 0.15.* kilted_*
+  - libstdcxx >=14
+  - libgcc >=14
+  - python_abi 3.12.* *_cp312
+  - numpy >=1.23,<3
+  - ros2-distro-mutex >=0.15.0,<0.16.0a0
+  license: Apache-2.0
+  size: 23997
+  timestamp: 1780988400672
 - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-ament-cmake-copyright-0.19.2-np2py312h61f2ce4_19.conda
   sha256: 5105639433ebf1fbc63afc0c99ec96c07a89050c826e9facc8873226c5cf04c3
   md5: 3264a1a7c7ec88e7b5d416f539fdeb87
@@ -11489,6 +11573,40 @@ packages:
   license: Apache-2.0
   size: 105638
   timestamp: 1779609179407
+- conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-ament-clang-format-0.19.2-np2py312h50b1e4c_19.conda
+  sha256: 29963a0433139436c39feb401fb9c5b8ebe64ee1af5812b098feef4de3187a70
+  md5: f71a014c890cd5fe6660f3a7cb96d69b
+  depends:
+  - clang-format
+  - python
+  - pyyaml
+  - ros-kilted-ros-workspace
+  - ros2-distro-mutex 0.15.* kilted_*
+  - libcxx >=18
+  - __osx >=11.0
+  - ros2-distro-mutex >=0.15.0,<0.16.0a0
+  - numpy >=1.23,<3
+  - python_abi 3.12.* *_cp312
+  license: Apache-2.0
+  size: 30932
+  timestamp: 1779605761126
+- conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-ament-clang-tidy-0.19.2-np2py312h50b1e4c_19.conda
+  sha256: bf9ba4a94160dd97e3f5d9734d4dab9099372eb3e5e9a5d5ba11cb0e66c6af47
+  md5: a7b3abf6a2dd329290a78503df773acd
+  depends:
+  - clang-tools
+  - python
+  - pyyaml
+  - ros-kilted-ros-workspace
+  - ros2-distro-mutex 0.15.* kilted_*
+  - __osx >=11.0
+  - libcxx >=18
+  - ros2-distro-mutex >=0.15.0,<0.16.0a0
+  - python_abi 3.12.* *_cp312
+  - numpy >=1.23,<3
+  license: Apache-2.0
+  size: 31155
+  timestamp: 1779605753742
 - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-ament-cmake-2.7.5-np2py312h50b1e4c_19.conda
   sha256: b191872df7e2b776eca44fed4f9b9bc6e70631e415258c4ed099c1d44adc6760
   md5: 743b7681cd0b450c531c206969d47449
@@ -11537,6 +11655,40 @@ packages:
   license: Apache-2.0
   size: 28731
   timestamp: 1779605642429
+- conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-ament-cmake-clang-format-0.19.2-np2py312h50b1e4c_19.conda
+  sha256: 1ef2d40978af211d2eb4db09c0c1e30d901ea56d60c49d749310a7e4b4f883ec
+  md5: 23d17bb19f3eddf5000dd653fe7650a5
+  depends:
+  - python
+  - ros-kilted-ament-clang-format
+  - ros-kilted-ament-cmake-test
+  - ros-kilted-ros-workspace
+  - ros2-distro-mutex 0.15.* kilted_*
+  - libcxx >=18
+  - __osx >=11.0
+  - python_abi 3.12.* *_cp312
+  - numpy >=1.23,<3
+  - ros2-distro-mutex >=0.15.0,<0.16.0a0
+  license: Apache-2.0
+  size: 24119
+  timestamp: 1779606110495
+- conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-ament-cmake-clang-tidy-0.19.2-np2py312h50b1e4c_19.conda
+  sha256: 6afb4ea0b23f6d1e8e3ede4c0a65699cfa9b99a39699350993e01fed881aa06f
+  md5: 6e5b17977da66eca8e88f413c60edafb
+  depends:
+  - python
+  - ros-kilted-ament-clang-tidy
+  - ros-kilted-ament-cmake-test
+  - ros-kilted-ros-workspace
+  - ros2-distro-mutex 0.15.* kilted_*
+  - __osx >=11.0
+  - libcxx >=18
+  - numpy >=1.23,<3
+  - ros2-distro-mutex >=0.15.0,<0.16.0a0
+  - python_abi 3.12.* *_cp312
+  license: Apache-2.0
+  size: 24592
+  timestamp: 1780988307307
 - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-ament-cmake-copyright-0.19.2-np2py312h50b1e4c_19.conda
   sha256: 7f14df7eee8261bdfd635cacb5f69840c36ddc4c0b38fedc940171475ef3a36d
   md5: dfe63d596478e32f2d22742a8be0196f

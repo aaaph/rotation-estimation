@@ -40,6 +40,24 @@ install(DIRECTORY include/
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
+  find_package(ament_cmake_clang_format REQUIRED)
+  find_package(ament_cmake_clang_tidy REQUIRED)
+
+  set(REPOSITORY_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../..")
+  set(CLANG_FORMAT_CONFIG "${REPOSITORY_ROOT}/.clang-format")
+  set(CLANG_TIDY_CONFIG "${REPOSITORY_ROOT}/.clang-tidy")
+  set(CLANG_TIDY_JOBS "4" CACHE STRING "Number of parallel clang-tidy jobs")
+
+  ament_clang_format(
+    CONFIG_FILE "${CLANG_FORMAT_CONFIG}"
+    include
+    src
+    test)
+  ament_clang_tidy(
+    CONFIG_FILE "${CLANG_TIDY_CONFIG}"
+    HEADER_FILTER "src/.*"
+    JOBS "${CLANG_TIDY_JOBS}"
+    "${CMAKE_CURRENT_BINARY_DIR}")
 
   ament_add_gtest(test_sense_hat_node test/test_sense_hat_node.cpp)
   target_link_libraries(test_sense_hat_node ${PROJECT_NAME}_lib)

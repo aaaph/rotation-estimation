@@ -2,9 +2,11 @@
 #define SENSE_HAT_BRIDGE_SENSE_HAT_NODE_HPP_
 
 #include <memory>
-#include <string>
 
-#include "rclcpp/rclcpp.hpp"
+#include "rclcpp/node.hpp"
+#include "rclcpp/node_options.hpp"
+#include "rclcpp/publisher.hpp"
+#include "rclcpp/timer.hpp"
 #include "sense_hat_bridge/imu_strategy.hpp"
 #include "sensor_msgs/msg/imu.hpp"
 

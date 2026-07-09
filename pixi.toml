@@ -16,11 +16,12 @@ format = { depends-on = ["format-py", "format-cpp"] }
 format-cpp = "python scripts/format_cpp.py"
 format-py = "ruff format . && ruff check --fix ."
 lint = { depends-on = ["lint-py", "lint-cpp"] }
-lint-cpp = { cmd = "python scripts/lint_cpp.py", depends-on = ["build"] }
+lint-cpp = { cmd = "colcon test --event-handlers console_direct+ --ctest-args -L linter", depends-on = ["build"] }
 lint-py = "ruff check . && ty check --exclude 'src/my_custom_package/**'"
 test = { depends-on = ["test-py", "test-cpp"] }
-test-cpp = { cmd = "colcon test --event-handlers console_direct+", depends-on = ["build"] }
+test-cpp = { cmd = "colcon test --event-handlers console_direct+ --ctest-args -LE linter", depends-on = ["build"] }
 test-py = "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest --verbose --color=yes --log-cli-level=WARNING src"
+check = "pixi run lint && pixi run test"
 build = "colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
 
 [tasks.sense_hat_imu_mock]
@@ -51,6 +52,8 @@ ninja = ">=1.13.2,<2"
 cmake = "<4"
 clang-format = ">=19.1.7,<23"
 clang-tools = ">=19.1.7,<23"
+ros-kilted-ament-cmake-clang-format = ">=0.19.2,<0.20"
+ros-kilted-ament-cmake-clang-tidy = ">=0.19.2,<0.20"
 
 [feature.mac-viz]
 platforms = ["osx-arm64"]
