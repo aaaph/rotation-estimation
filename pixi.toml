@@ -6,8 +6,8 @@ platforms = ["osx-arm64", "linux-aarch64", "linux-64"]
 version = "0.1.0"
 
 [tasks]
-"ide:mac" = { cmd = "./scripts/activate-ide-profile.sh mac", default-environment = "dev-runtime" }
-"ide:pi5" = { cmd = "./scripts/activate-ide-profile.sh pi5", default-environment = "edge-runtime" }
+"ide:dev-runtime" = { cmd = "./scripts/activate-ide-profile.sh dev-runtime", default-environment = "dev-runtime" }
+"ide:edge-runtime" = { cmd = "./scripts/activate-ide-profile.sh edge-runtime", default-environment = "edge-runtime" }
 zenohd = "./scripts/run-zenohd.sh"
 heartbeat_listener = "ros2 topic echo /m1_heartbeat"
 heartbeat_publisher = "ros2 topic pub /m1_heartbeat std_msgs/msg/Int32 '{data: 1}' --rate 1"

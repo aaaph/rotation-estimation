@@ -1,0 +1,33 @@
+{
+  "window.title": "EDGE ${rootName}${separator}${activeEditorShort}",
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#991B1B",
+    "activityBar.foreground": "#FFFFFF",
+    "statusBar.background": "#7F1D1D",
+    "statusBar.foreground": "#FFFFFF",
+    "titleBar.activeBackground": "#7F1D1D",
+    "titleBar.activeForeground": "#FFFFFF"
+  },
+  "python.envFile": "${workspaceFolder}/.vscode/python-test.env",
+  "python.testing.pytestArgs": ["."],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "cSpell.words": [
+    "colcon",
+    "cppcoreguidelines",
+    "ctest",
+    "DCMAKE",
+    "nullptr",
+    "numpy",
+    "PYTEST",
+    "PYTHONHOME",
+    "PYTHONPATH",
+    "rclcpp",
+    "rclpy",
+    "robostack",
+    "RTIMU",
+    "rviz",
+    "zenoh",
+    "zenohd"
+  ]
+}

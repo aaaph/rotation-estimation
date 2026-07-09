@@ -5,10 +5,10 @@ profile="${1:-}"
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 case "$profile" in
-  mac | pi5)
+  dev-runtime | edge-runtime)
     ;;
   *)
-    echo "Usage: $0 mac|pi5" >&2
+    echo "Usage: $0 dev-runtime|edge-runtime" >&2
     exit 2
     ;;
 esac
