@@ -11,6 +11,7 @@ version = "0.1.0"
 zenohd = "./scripts/run-zenohd.sh"
 heartbeat_listener = "ros2 topic echo /m1_heartbeat"
 heartbeat_publisher = "ros2 topic pub /m1_heartbeat std_msgs/msg/Int32 '{data: 1}' --rate 1"
+new-cpp-node = { args = ["package", "node"], cmd = "python scripts/create_cpp_node.py {{ package }} {{ node }}" }
 format = { depends-on = ["format-py", "format-cpp"] }
 format-cpp = "python scripts/format_cpp.py"
 format-py = "ruff format . && ruff check --fix ."
@@ -18,7 +19,7 @@ lint = { depends-on = ["lint-py", "lint-cpp"] }
 lint-cpp = { cmd = "python scripts/lint_cpp.py", depends-on = ["build"] }
 lint-py = "ruff check . && ty check --exclude 'src/my_custom_package/**'"
 test = { depends-on = ["test-py", "test-cpp"] }
-test-cpp = { cmd = "colcon test --packages-select my_cpp_package --event-handlers console_direct+", depends-on = ["build"] }
+test-cpp = { cmd = "colcon test --event-handlers console_direct+", depends-on = ["build"] }
 test-py = "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest --verbose --color=yes --log-cli-level=WARNING src"
 build = "colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
 

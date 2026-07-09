@@ -22,15 +22,18 @@ Checks: >
   -readability-magic-numbers,
   -readability-named-parameter
 
-WarningsAsErrors: ''
-HeaderFilterRegex: 'src/.*'
+WarningsAsErrors: ""
+HeaderFilterRegex: "src/.*"
 FormatStyle: file
 
 CheckOptions:
+  - key: readability-function-cognitive-complexity.IgnoreMacros
+    value: "true"
   - key: readability-function-cognitive-complexity.Threshold
-    value: '25'
+    value: "25"
   - key: readability-function-size.LineThreshold
-    value: '120'
+    value: "120"
   - key: modernize-use-nullptr.NullMacros
-    value: 'NULL'
+    value: "NULL"
 ...
+

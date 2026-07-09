@@ -75,6 +75,8 @@ def main() -> int:
             )
             return 2
 
+        sys.stdout.write(f"clang-tidy {path}\n")
+        sys.stdout.flush()
         result = subprocess.run(  # noqa: S603
             [executable, "--quiet", "-p", str(build_dir), str(path)],
             check=False,
