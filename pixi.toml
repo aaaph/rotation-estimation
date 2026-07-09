@@ -2,12 +2,12 @@
 authors = ["Ivan Aphanasyev <nekaktotak2@gmail.com>"]
 channels = ["conda-forge", "robostack-kilted"]
 name = "rotation_estimation"
-platforms = ["osx-arm64", "linux-aarch64"]
+platforms = ["osx-arm64", "linux-aarch64", "linux-64"]
 version = "0.1.0"
 
 [tasks]
-"ide:mac" = { cmd = "./scripts/activate-ide-profile.sh mac", default-environment = "mac-viz" }
-"ide:pi5" = { cmd = "./scripts/activate-ide-profile.sh pi5", default-environment = "pi-runtime" }
+"ide:mac" = { cmd = "./scripts/activate-ide-profile.sh mac", default-environment = "dev-runtime" }
+"ide:pi5" = { cmd = "./scripts/activate-ide-profile.sh pi5", default-environment = "edge-runtime" }
 zenohd = "./scripts/run-zenohd.sh"
 heartbeat_listener = "ros2 topic echo /m1_heartbeat"
 heartbeat_publisher = "ros2 topic pub /m1_heartbeat std_msgs/msg/Int32 '{data: 1}' --rate 1"
@@ -55,27 +55,27 @@ clang-tools = ">=19.1.7,<23"
 ros-kilted-ament-cmake-clang-format = ">=0.19.2,<0.20"
 ros-kilted-ament-cmake-clang-tidy = ">=0.19.2,<0.20"
 
-[feature.mac-viz]
-platforms = ["osx-arm64"]
+[feature.dev-runtime]
+platforms = ["osx-arm64", "linux-64"]
 channels = ["robostack-kilted", "conda-forge"]
 
-[feature.pi-runtime]
+[feature.edge-runtime]
 platforms = ["linux-aarch64"]
 channels = ["robostack-kilted", "conda-forge"]
 
-[feature.mac-viz.tasks]
+[feature.dev-runtime.tasks]
 rviz = "rviz2"
 rerun = "rerun"
 
 
-[feature.pi-runtime.tasks]
+[feature.edge-runtime.tasks]
 sense_hat_udp_reader = "env -u PYTHONPATH -u PYTHONHOME /usr/bin/python3 src/sense_hat/sense_hat_udp_publisher.py"
 sense_hat_imu = { cmd = "bash -lc 'source install/setup.bash && ros2 run sense_hat_bridge sense_hat_node'", depends-on = ["build"] }
 
-[feature.mac-viz.dependencies]
+[feature.dev-runtime.dependencies]
 ros-kilted-rviz2 = "*"
 rerun-sdk = "*"
 
 [environments]
-mac-viz = { features = ["mac-viz"] }
-pi-runtime = { features = ["pi-runtime"] }
+dev-runtime = { features = ["dev-runtime"] }
+edge-runtime = { features = ["edge-runtime"] }
