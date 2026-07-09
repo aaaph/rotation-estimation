@@ -9,4 +9,3 @@ jobs:
   test:
     name: Test
     uses: ./.github/workflows/test.yaml
-    needs: build_wheels
