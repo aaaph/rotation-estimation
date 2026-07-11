@@ -7,6 +7,8 @@
 namespace rotation_estimation {
 namespace {
 
+using Matrix6d = Eigen::Matrix<double, 6, 6>;
+
 Eigen::Matrix3d Skew(const Eigen::Vector3d& v) {
   Eigen::Matrix3d m;
   m << 0, -v(2), v(1), v(2), 0, -v(0), -v(1), v(0), 0;
@@ -54,8 +56,28 @@ void ESEKF::predict(const Eigen::Vector3d& gyro, int64_t timestamp_ns_next) {
   timestamp_ns_ = timestamp_ns_next;
 
   Eigen::Vector3d gyro_hat = gyro - state_.gyro_bias;
+
+  Matrix6d Fc = Matrix6d::Zero();
+  Fc.block<3, 3>(0, 0) = -Skew(gyro_hat);
+  Fc.block<3, 3>(0, 3) = -Eigen::Matrix3d::Identity();
+
+  Matrix6d Gc = Matrix6d::Zero();
+  Gc.block<3, 3>(0, 0) = -Eigen::Matrix3d::Identity();
+  Gc.block<3, 3>(3, 3) = Eigen::Matrix3d::Identity();
+
+  Matrix6d Qc = Matrix6d::Zero();
+  Qc.block<3, 3>(0, 0) = std::pow(options_.gyro_noise_std, 2) * Eigen::Matrix3d::Identity();
+  Qc.block<3, 3>(3, 3) =
+      std::pow(options_.gyro_bias_random_walk_std, 2) * Eigen::Matrix3d::Identity();
+
+  const Matrix6d F = Matrix6d::Identity() + Fc * dt;
+  const Matrix6d Qd = Gc * Qc * Gc.transpose() * dt;
+
   const Eigen::Quaterniond dq = Eigen::Quaterniond(ExpSO3Matrix(gyro_hat * dt));
+
   state_.q = (state_.q * dq).normalized();
+  state_.covariance = F * state_.covariance * F.transpose() + Qd;
+  state_.covariance = 0.5 * (state_.covariance + state_.covariance.transpose());
 }
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
