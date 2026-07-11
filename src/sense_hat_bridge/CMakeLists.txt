@@ -47,6 +47,9 @@ if(BUILD_TESTING)
   set(CLANG_FORMAT_CONFIG "${REPOSITORY_ROOT}/.clang-format")
   set(CLANG_TIDY_CONFIG "${REPOSITORY_ROOT}/.clang-tidy")
   set(CLANG_TIDY_JOBS "4" CACHE STRING "Number of parallel clang-tidy jobs")
+  find_program(AMENT_CLANG_FORMAT_BIN NAMES ament_clang_format REQUIRED)
+  get_filename_component(AMENT_LINT_BIN_DIR "${AMENT_CLANG_FORMAT_BIN}" DIRECTORY)
+  set(AMENT_LINT_TEST_ENV "PATH=${AMENT_LINT_BIN_DIR}:$ENV{PATH}")
 
   ament_clang_format(
     CONFIG_FILE "${CLANG_FORMAT_CONFIG}"
@@ -58,6 +61,8 @@ if(BUILD_TESTING)
     HEADER_FILTER "src/.*"
     JOBS "${CLANG_TIDY_JOBS}"
     "${CMAKE_CURRENT_BINARY_DIR}")
+  set_tests_properties(clang_format clang_tidy
+    PROPERTIES ENVIRONMENT "${AMENT_LINT_TEST_ENV}")
 
   ament_add_gtest(test_sense_hat_node test/test_sense_hat_node.cpp)
   target_link_libraries(test_sense_hat_node ${PROJECT_NAME}_lib)

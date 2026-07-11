@@ -61,6 +61,7 @@ clang-format = ">=19.1.7,<23"
 clang-tools = ">=19.1.7,<23"
 ros-kilted-ament-cmake-clang-format = ">=0.19.2,<0.20"
 ros-kilted-ament-cmake-clang-tidy = ">=0.19.2,<0.20"
+eigen = ">=5.0.1,<6"
 
 [feature.dev-runtime]
 platforms = ["osx-arm64", "linux-64"]

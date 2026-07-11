@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(my_cpp_package)
+project(rotation_estimation)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -9,28 +9,27 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
+find_package(Eigen3 REQUIRED)
 
-add_library(my_cpp_node_lib src/my_cpp_node_logic.cpp)
-target_include_directories(my_cpp_node_lib PUBLIC
+add_library(${PROJECT_NAME}_lib src/ekf_node.cpp src/esekf.cpp)
+target_include_directories(${PROJECT_NAME}_lib PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
-target_compile_features(my_cpp_node_lib PUBLIC cxx_std_17)
+target_link_libraries(${PROJECT_NAME}_lib PUBLIC rclcpp::rclcpp)
+target_link_libraries(${PROJECT_NAME}_lib PUBLIC Eigen3::Eigen)
 
-add_executable(my_cpp_node src/my_cpp_node.cpp)
-target_include_directories(my_cpp_node PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
-target_link_libraries(my_cpp_node PRIVATE my_cpp_node_lib)
-target_compile_features(my_cpp_node PUBLIC cxx_std_17)
+add_executable(ekf_node src/ekf_node_main.cpp)
+target_link_libraries(ekf_node PRIVATE ${PROJECT_NAME}_lib)
 
-install(TARGETS my_cpp_node
-  DESTINATION lib/${PROJECT_NAME})
+install(TARGETS ${PROJECT_NAME}_lib ekf_node
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION lib/${PROJECT_NAME})
+
+install(DIRECTORY include/
+  DESTINATION include)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
@@ -58,8 +57,11 @@ if(BUILD_TESTING)
   set_tests_properties(clang_format clang_tidy
     PROPERTIES ENVIRONMENT "${AMENT_LINT_TEST_ENV}")
 
-  ament_add_gtest(test_my_cpp_node test/test_my_cpp_node.cpp)
-  target_link_libraries(test_my_cpp_node my_cpp_node_lib)
+  ament_add_gtest(test_ekf_node test/test_ekf_node.cpp)
+  target_link_libraries(test_ekf_node ${PROJECT_NAME}_lib)
+
+  ament_add_gtest(test_esekf test/test_esekf.cpp)
+  target_link_libraries(test_esekf ${PROJECT_NAME}_lib)
 endif()
 
 ament_package()
