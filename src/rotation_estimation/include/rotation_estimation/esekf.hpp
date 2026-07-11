@@ -8,6 +8,7 @@ namespace rotation_estimation {
 struct ESEKFConfig {
   double gyro_noise_std = 0.02;
   double gyro_bias_random_walk_std = 0.001;
+  double stationary_gyro_noise_std = 0.02;
   double accel_noise_std = 0.2;
   double g = 9.80665;
   double accel_norm_gate = 1.0;
@@ -26,7 +27,8 @@ class ESEKF {
   [[nodiscard]] int64_t timestamp_ns() const;
   void reset(const ESEKFState& state);
   void predict(const Eigen::Vector3d& gyro, int64_t timestamp_ns_next);
-  void update(const Eigen::Vector3d& accel);
+  void updateByAccel(const Eigen::Vector3d& accel);
+  void updateByStationary(const Eigen::Vector3d& gyro);
 
  private:
   ESEKFConfig options_;
