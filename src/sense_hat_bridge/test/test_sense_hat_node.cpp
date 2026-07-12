@@ -5,5 +5,5 @@
 
 TEST(SenseHatNodeTest, UsesDefaultNodeName) {
   EXPECT_EQ(std::string_view{sense_hat_bridge::SenseHatNode::kDefaultNodeName},
-            "sensehat_udp_imu_node");
+            "sense_hat_imu_node");
 }

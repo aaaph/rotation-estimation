@@ -14,7 +14,7 @@ SenseHatNode::SenseHatNode(const rclcpp::NodeOptions& options)
   declare_parameter("mock", false);
   declare_parameter("mock_mode", std::string{kMockModeYawRotation});
   declare_parameter("mock_rate_hz", 50.0);
-  declare_parameter("mock_angular_velocity_z", 0.25);
+  declare_parameter("mock_angular_velocity_z", 3.75);
   declare_parameter("host", "127.0.0.1");
   declare_parameter("port", 8765);
   declare_parameter("frame_id", "sensehat_link");

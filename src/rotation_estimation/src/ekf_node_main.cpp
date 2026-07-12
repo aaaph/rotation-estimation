@@ -1,6 +1,7 @@
 #include <memory>
 
-#include "rclcpp/rclcpp.hpp"
+#include "rclcpp/executors.hpp"
+#include "rclcpp/utilities.hpp"
 #include "rotation_estimation/ekf_node.hpp"
 
 int main(int argc, char** argv) {

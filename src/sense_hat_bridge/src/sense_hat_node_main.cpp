@@ -1,6 +1,7 @@
 #include <memory>
 
-#include "rclcpp/rclcpp.hpp"
+#include "rclcpp/executors.hpp"
+#include "rclcpp/utilities.hpp"
 #include "sense_hat_bridge/sense_hat_node.hpp"
 
 int main(int argc, char** argv) {

@@ -1,3 +1,9 @@
 CompileFlags:
   CompilationDatabase: build
-  Add: [-std=c++20]
+  Add:
+    - -std=c++20
+    - -I.pixi/envs/default/include/builtin_interfaces
+    - -I.pixi/envs/default/include/geometry_msgs
+    - -I.pixi/envs/default/include/rclcpp
+    - -I.pixi/envs/default/include/sensor_msgs
+    - -I.pixi/envs/default/include/std_msgs

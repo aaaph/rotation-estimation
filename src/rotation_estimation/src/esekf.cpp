@@ -4,10 +4,12 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <cmath>
+#include <numbers>
 
 namespace rotation_estimation {
 namespace {
 
+constexpr double kDegToRad = std::numbers::pi / 180.0;
 using Matrix6d = Eigen::Matrix<double, 6, 6>;
 using Matrix3x6d = Eigen::Matrix<double, 3, 6>;
 using Matrix6x3d = Eigen::Matrix<double, 6, 3>;
@@ -29,6 +31,13 @@ Eigen::Matrix3d ExpSO3Matrix(const Eigen::Vector3d& phi) {
   return I + (std::sin(theta) / theta) * K + ((1.0 - std::cos(theta)) / (theta * theta)) * K * K;
 }
 
+double Square(double x) {
+  return x * x;
+}
+double DegToRad(double deg) {
+  return deg * kDegToRad;
+}
+
 void Symmetrize(Matrix6d& covariance) {
   covariance = (covariance + covariance.transpose()) / 2.0;
 }
@@ -37,7 +46,13 @@ void Symmetrize(Matrix6d& covariance) {
 
 ESEKF::ESEKF(ESEKFConfig options, int64_t timestamp_ns)
     : options_(options), timestamp_ns_(timestamp_ns) {
-  state_.covariance.setIdentity();
+  state_.covariance.setZero();
+  state_.covariance(0, 0) = Square(DegToRad(options_.initial_tilt_sigma_deg));
+  state_.covariance(1, 1) = Square(DegToRad(options_.initial_tilt_sigma_deg));
+  state_.covariance(2, 2) = Square(DegToRad(options_.initial_yaw_sigma_deg));
+  state_.covariance(3, 3) = Square(DegToRad(1.0));
+  state_.covariance(4, 4) = Square(DegToRad(1.0));
+  state_.covariance(5, 5) = Square(DegToRad(1.0));
   state_.q.normalize();
 }
 
@@ -52,6 +67,10 @@ int64_t ESEKF::timestamp_ns() const {
 void ESEKF::reset(const ESEKFState& state) {
   state_ = state;
   state_.q.normalize();
+}
+
+Eigen::Matrix<double, 6, 1> ESEKF::covariance_diagonal() const {
+  return state_.covariance.diagonal();
 }
 
 void ESEKF::predict(const Eigen::Vector3d& gyro, int64_t timestamp_ns_next) {

@@ -370,6 +370,7 @@ environments:
       - conda: https://conda.anaconda.org/robostack-kilted/linux-64/ros-kilted-std-msgs-5.5.2-np2py312h2ed9cc7_21.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-64/ros-kilted-std-srvs-5.5.2-np2py312h2ed9cc7_21.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-64/ros-kilted-stereo-msgs-5.5.2-np2py312h2ed9cc7_21.conda
+      - conda: https://conda.anaconda.org/robostack-kilted/linux-64/ros-kilted-tf2-msgs-0.41.6-np2py312h2ed9cc7_21.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-64/ros-kilted-tinyxml2-vendor-0.10.1-np2py312h2ed9cc7_21.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-64/ros-kilted-tracetools-8.6.0-np2py312h2ed9cc7_21.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-64/ros-kilted-trajectory-msgs-5.5.2-np2py312h2ed9cc7_21.conda
@@ -729,6 +730,7 @@ environments:
       - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-std-msgs-5.5.2-np2py312h61f2ce4_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-std-srvs-5.5.2-np2py312h61f2ce4_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-stereo-msgs-5.5.2-np2py312h61f2ce4_19.conda
+      - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-tf2-msgs-0.41.6-np2py312h61f2ce4_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-tinyxml2-vendor-0.10.1-np2py312h61f2ce4_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-tracetools-8.6.0-np2py312h61f2ce4_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-trajectory-msgs-5.5.2-np2py312h61f2ce4_19.conda
@@ -1082,6 +1084,7 @@ environments:
       - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-std-msgs-5.5.2-np2py312h50b1e4c_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-std-srvs-5.5.2-np2py312h50b1e4c_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-stereo-msgs-5.5.2-np2py312h50b1e4c_19.conda
+      - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-tf2-msgs-0.41.6-np2py312h50b1e4c_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-tinyxml2-vendor-0.10.1-np2py312h50b1e4c_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-tracetools-8.6.0-np2py312h50b1e4c_19.conda
       - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-trajectory-msgs-5.5.2-np2py312h50b1e4c_19.conda
@@ -2626,6 +2629,7 @@ environments:
       - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-std-msgs-5.5.2-np2py312h61f2ce4_21.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-std-srvs-5.5.2-np2py312h61f2ce4_21.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-stereo-msgs-5.5.2-np2py312h61f2ce4_21.conda
+      - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-tf2-msgs-0.41.6-np2py312h61f2ce4_21.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-tinyxml2-vendor-0.10.1-np2py312h61f2ce4_21.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-tracetools-8.6.0-np2py312h61f2ce4_21.conda
       - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-trajectory-msgs-5.5.2-np2py312h61f2ce4_21.conda
@@ -24561,6 +24565,42 @@ packages:
   license: Apache-2.0
   size: 87349
   timestamp: 1783544593027
+- conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-tf2-msgs-0.41.6-np2py312h61f2ce4_19.conda
+  sha256: 7e811345502284d5d5f38afec38d32b091ace7614015206284b36531efc0fcbc
+  md5: 2a9dfd317470996d6f5a31a7c980c8ca
+  depends:
+  - python
+  - ros-kilted-builtin-interfaces
+  - ros-kilted-geometry-msgs
+  - ros-kilted-ros-workspace
+  - ros-kilted-rosidl-default-runtime
+  - ros2-distro-mutex 0.15.* kilted_*
+  - libgcc >=14
+  - libstdcxx >=14
+  - numpy >=1.23,<3
+  - python_abi 3.12.* *_cp312
+  - ros2-distro-mutex >=0.15.0,<0.16.0a0
+  license: BSD-3-Clause
+  size: 267072
+  timestamp: 1779607229275
+- conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-tf2-msgs-0.41.6-np2py312h61f2ce4_21.conda
+  sha256: d7a8c0538409d9c8b2ab16aacb504a6f40fda709c5b16069a9351d3f519fc9ee
+  md5: abfdea61011b2e3faed274b0ef3e508c
+  depends:
+  - python
+  - ros-kilted-builtin-interfaces
+  - ros-kilted-geometry-msgs
+  - ros-kilted-ros-workspace
+  - ros-kilted-rosidl-default-runtime
+  - ros2-distro-mutex 0.17.* kilted_*
+  - libstdcxx >=14
+  - libgcc >=14
+  - python_abi 3.12.* *_cp312
+  - ros2-distro-mutex >=0.17.0,<0.18.0a0
+  - numpy >=1.25,<3
+  license: BSD-3-Clause
+  size: 267935
+  timestamp: 1783544254738
 - conda: https://conda.anaconda.org/robostack-kilted/linux-aarch64/ros-kilted-tinyxml2-vendor-0.10.1-np2py312h61f2ce4_19.conda
   sha256: 58957e4c95bdc06c040a49f92485b8de9755fc9d06179b6574270568074dbf80
   md5: 2d687b02c138b80f5124d144e41e0410
@@ -31777,6 +31817,24 @@ packages:
   license: BSD-3-Clause
   size: 58349
   timestamp: 1783567291365
+- conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-tf2-msgs-0.41.6-np2py312h50b1e4c_19.conda
+  sha256: a947f45823d2438e745238f1aaeb5dd47a318c6c94d8e743e94e6bbb75f67f73
+  md5: e868e0e0d99b8bfb05d268c9af8314a6
+  depends:
+  - python
+  - ros-kilted-builtin-interfaces
+  - ros-kilted-geometry-msgs
+  - ros-kilted-ros-workspace
+  - ros-kilted-rosidl-default-runtime
+  - ros2-distro-mutex 0.15.* kilted_*
+  - libcxx >=18
+  - __osx >=11.0
+  - python_abi 3.12.* *_cp312
+  - numpy >=1.23,<3
+  - ros2-distro-mutex >=0.15.0,<0.16.0a0
+  license: BSD-3-Clause
+  size: 232521
+  timestamp: 1779609529253
 - conda: https://conda.anaconda.org/robostack-kilted/osx-arm64/ros-kilted-tf2-msgs-0.41.6-np2py312h50b1e4c_21.conda
   sha256: 6857a9ea8a2af8142da1847e625006b2962b474a8fbe4ff90620beec781d195f
   md5: a1064f0ffc6dd4175fa4ef5d30b3f2eb

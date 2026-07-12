@@ -10,15 +10,23 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(tf2_msgs REQUIRED)
 find_package(Eigen3 REQUIRED)
 
 add_library(${PROJECT_NAME}_lib src/ekf_node.cpp src/esekf.cpp)
 target_include_directories(${PROJECT_NAME}_lib PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
-target_link_libraries(${PROJECT_NAME}_lib PUBLIC rclcpp::rclcpp)
-target_link_libraries(${PROJECT_NAME}_lib PUBLIC Eigen3::Eigen)
+target_link_libraries(${PROJECT_NAME}_lib PUBLIC
+  ${geometry_msgs_TARGETS}
+  ${sensor_msgs_TARGETS}
+  ${tf2_msgs_TARGETS}
+  sensor_msgs::sensor_msgs_library
+  rclcpp::rclcpp
+  Eigen3::Eigen)
 
 add_executable(ekf_node src/ekf_node_main.cpp)
 target_link_libraries(ekf_node PRIVATE ${PROJECT_NAME}_lib)

@@ -12,6 +12,8 @@ struct ESEKFConfig {
   double accel_noise_std = 0.2;
   double g = 9.80665;
   double accel_norm_gate = 1.0;
+  double initial_yaw_sigma_deg = 5.0;
+  double initial_tilt_sigma_deg = 5.0;
 };
 
 struct ESEKFState {
@@ -29,6 +31,7 @@ class ESEKF {
   void predict(const Eigen::Vector3d& gyro, int64_t timestamp_ns_next);
   void updateByAccel(const Eigen::Vector3d& accel);
   void updateByStationary(const Eigen::Vector3d& gyro);
+  [[nodiscard]] Eigen::Matrix<double, 6, 1> covariance_diagonal() const;
 
  private:
   ESEKFConfig options_;

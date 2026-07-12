@@ -14,7 +14,7 @@ namespace sense_hat_bridge {
 
 class SenseHatNode final : public rclcpp::Node {
  public:
-  static constexpr auto kDefaultNodeName = "sensehat_udp_imu_node";
+  static constexpr auto kDefaultNodeName = "sense_hat_imu_node";
 
   explicit SenseHatNode(const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
 

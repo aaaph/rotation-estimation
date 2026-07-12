@@ -49,6 +49,16 @@ TEST(ESEKFTest, PredictKeepsCovarianceSymmetric) {
   EXPECT_NEAR(asymmetry.norm(), 0.0, 1e-12);
 }
 
+TEST(ESEKFTest, CovarianceDiagonalReturnsStateCovarianceDiagonal) {
+  rotation_estimation::ESEKFState state{};
+  state.covariance.diagonal() << 0.1, 0.2, 0.3, 0.4, 0.5, 0.6;
+
+  rotation_estimation::ESEKF filter{};
+  filter.reset(state);
+
+  EXPECT_TRUE(filter.covariance_diagonal().isApprox(state.covariance.diagonal()));
+}
+
 TEST(ESEKFTest, PredictAddsGyroNoiseToOrientationCovariance) {
   rotation_estimation::ESEKFConfig config{};
   config.gyro_noise_std = 0.3;
