@@ -9,7 +9,9 @@ import sys
 import textwrap
 
 CPP_STANDARD = "20"
+DEFAULT_CMAKE_STYLE = "modern"
 DEFAULT_DESTINATION_DIRECTORY = pathlib.Path("src")
+SUPPORTED_CMAKE_STYLES = ("modern", "ament")
 ROS_NAME_PATTERN = re.compile(r"^[a-z][a-z0-9_]*[a-z0-9]$")
 
 
@@ -23,6 +25,12 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_DESTINATION_DIRECTORY,
         type=pathlib.Path,
         help="Directory where the ROS package will be created.",
+    )
+    parser.add_argument(
+        "--cmake-style",
+        choices=SUPPORTED_CMAKE_STYLES,
+        default=DEFAULT_CMAKE_STYLE,
+        help="Dependency linking style to generate. Use `modern` for Jazzy+ target links.",
     )
     return parser.parse_args()
 
@@ -55,20 +63,36 @@ def header_template(package: str, node: str, node_class: str) -> str:
         #ifndef {guard}
         #define {guard}
 
-        #include "rclcpp/rclcpp.hpp"
+        #include <chrono>
+        #include <string>
+
+        #include "rclcpp/node.hpp"
+        #include "rclcpp/node_options.hpp"
+        #include "rclcpp/publisher.hpp"
+        #include "rclcpp/timer.hpp"
+        #include "std_msgs/msg/string.hpp"
 
         namespace {package} {{
 
         class {node_class} final : public rclcpp::Node {{
-         public:
+        public:
           static constexpr auto kDefaultNodeName = "{node}";
 
-          explicit {node_class}(const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
+          explicit {node_class}(
+              const rclcpp::NodeOptions &options = rclcpp::NodeOptions());
+
+        private:
+          void publish_heartbeat();
+
+          rclcpp::Publisher<std_msgs::msg::String>::SharedPtr heartbeat_publisher_;
+          rclcpp::TimerBase::SharedPtr heartbeat_timer_;
+          std::string frame_id_;
+          std::chrono::nanoseconds heartbeat_period_{{std::chrono::seconds{{1}}}};
         }};
 
-        }}  // namespace {package}
+        }} // namespace {package}
 
-        #endif  // {guard}
+        #endif // {guard}
         """
     )
 
@@ -79,16 +103,151 @@ def node_template(package: str, node: str, node_class: str) -> str:
         f"""\
         #include "{package}/{node}.hpp"
 
-        namespace {package} {{
+        #include <chrono>
+        #include <string>
+        #include <utility>
 
-        {node_class}::{node_class}(const rclcpp::NodeOptions& options)
-            : rclcpp::Node(kDefaultNodeName, options) {{
-          RCLCPP_INFO(get_logger(), "%s started", kDefaultNodeName);
+        #include "rcl_interfaces/msg/floating_point_range.hpp"
+        #include "rcl_interfaces/msg/parameter_descriptor.hpp"
+        #include "rclcpp/qos.hpp"
+
+        namespace {package} {{
+        namespace {{
+
+        constexpr double kDefaultHeartbeatRateHz = 1.0;
+        constexpr double kMinimumHeartbeatRateHz = 0.1;
+        constexpr double kMaximumHeartbeatRateHz = 1000.0;
+
+        rcl_interfaces::msg::ParameterDescriptor
+        string_parameter_descriptor(const std::string &description) {{
+          auto descriptor = rcl_interfaces::msg::ParameterDescriptor{{}};
+          descriptor.description = description;
+          return descriptor;
         }}
 
-        }}  // namespace {package}
+        rcl_interfaces::msg::ParameterDescriptor heartbeat_rate_descriptor() {{
+          auto descriptor = rcl_interfaces::msg::ParameterDescriptor{{}};
+          descriptor.description = "Heartbeat publication rate in Hz.";
+          descriptor.floating_point_range.resize(1);
+          descriptor.floating_point_range[0].from_value = kMinimumHeartbeatRateHz;
+          descriptor.floating_point_range[0].to_value = kMaximumHeartbeatRateHz;
+          descriptor.floating_point_range[0].step = 0.0;
+          return descriptor;
+        }}
+
+        }} // namespace
+
+        {node_class}::{node_class}(const rclcpp::NodeOptions &options)
+            : rclcpp::Node(kDefaultNodeName, options) {{
+          const auto topic =
+              declare_parameter("topic", std::string{{"heartbeat"}},
+                                string_parameter_descriptor("Heartbeat output topic."));
+          frame_id_ = declare_parameter(
+              "frame_id", std::string{{"base_link"}},
+              string_parameter_descriptor("Frame name reported in heartbeat payload."));
+          const auto heartbeat_rate_hz =
+              declare_parameter("heartbeat_rate_hz", kDefaultHeartbeatRateHz,
+                                heartbeat_rate_descriptor());
+
+          heartbeat_period_ = std::chrono::duration_cast<std::chrono::nanoseconds>(
+              std::chrono::duration<double>{{1.0 / heartbeat_rate_hz}});
+
+          heartbeat_publisher_ =
+              create_publisher<std_msgs::msg::String>(topic, rclcpp::QoS{{1}}.reliable());
+          heartbeat_timer_ =
+              create_wall_timer(heartbeat_period_, [this]() {{ publish_heartbeat(); }});
+
+          RCLCPP_INFO(get_logger(), "%s started, publishing heartbeat on %s",
+                      kDefaultNodeName, topic.c_str());
+        }}
+
+        void {node_class}::publish_heartbeat() {{
+          auto message = std_msgs::msg::String{{}};
+          message.data = std::string{{kDefaultNodeName}} + " heartbeat from " + frame_id_;
+          heartbeat_publisher_->publish(std::move(message));
+        }}
+
+        }} // namespace {package}
         """
     )
+
+
+def launch_template(package: str, node: str) -> str:
+    """Return the ROS 2 Python launch template."""
+    return textwrap.dedent(
+        f"""\
+        from launch import LaunchDescription
+        from launch.actions import DeclareLaunchArgument
+        from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+        from launch_ros.actions import Node
+        from launch_ros.substitutions import FindPackageShare
+
+
+        def generate_launch_description():
+            config_file = DeclareLaunchArgument(
+                "config",
+                default_value=PathJoinSubstitution(
+                    [FindPackageShare("{package}"), "config", "params.yaml"]
+                ),
+                description="Path to the node parameter file.",
+            )
+            use_sim_time = DeclareLaunchArgument(
+                "use_sim_time",
+                default_value="false",
+                description="Use simulation clock.",
+            )
+
+            node = Node(
+                package="{package}",
+                executable="{node}",
+                name="{node}",
+                output="screen",
+                parameters=[
+                    LaunchConfiguration("config"),
+                    {{"use_sim_time": LaunchConfiguration("use_sim_time")}},
+                ],
+            )
+
+            return LaunchDescription([config_file, use_sim_time, node])
+        """
+    )
+
+
+def params_template(node: str) -> str:
+    """Return the default ROS 2 parameter file template."""
+    return textwrap.dedent(
+        f"""\
+        {node}:
+          ros__parameters:
+            topic: heartbeat
+            frame_id: base_link
+            heartbeat_rate_hz: 1.0
+        """
+    )
+
+
+def cmake_link_block(cmake_style: str) -> str:
+    """Return the generated CMake dependency linking block."""
+    if cmake_style == "modern":
+        return textwrap.dedent(
+            """\
+            target_link_libraries(${PROJECT_NAME}_lib PUBLIC
+              rclcpp::rclcpp
+              ${rcl_interfaces_TARGETS}
+              ${std_msgs_TARGETS})
+            """
+        )
+    if cmake_style == "ament":
+        return textwrap.dedent(
+            """\
+            ament_target_dependencies(${PROJECT_NAME}_lib
+              rclcpp
+              rcl_interfaces
+              std_msgs)
+            """
+        )
+    msg = f"Unsupported CMake style: {cmake_style}"
+    raise ValueError(msg)
 
 
 def main_template(package: str, node: str, node_class: str) -> str:
@@ -101,7 +260,7 @@ def main_template(package: str, node: str, node_class: str) -> str:
 
         #include "{package}/{node}.hpp"
 
-        int main(int argc, char** argv) {{
+        int main(int argc, char **argv) {{
           rclcpp::init(argc, argv);
           rclcpp::spin(std::make_shared<{package}::{node_class}>());
           rclcpp::shutdown();
@@ -123,14 +282,16 @@ def test_template(package: str, node: str, node_class: str) -> str:
         #include "{package}/{node}.hpp"
 
         TEST({node_class}Test, UsesDefaultNodeName) {{
-          EXPECT_EQ(std::string_view{{{package}::{node_class}::kDefaultNodeName}}, "{node}");
+          EXPECT_EQ(std::string_view{{{package}::{node_class}::kDefaultNodeName}},
+                    "{node}");
         }}
         """
     )
 
 
-def cmake_template(package: str, node: str) -> str:
+def cmake_template(package: str, node: str, cmake_style: str) -> str:
     """Return the CMakeLists.txt template."""
+    link_block = textwrap.indent(cmake_link_block(cmake_style).rstrip(), " " * 8)
     return textwrap.dedent(
         f"""\
         cmake_minimum_required(VERSION 3.20)
@@ -145,13 +306,15 @@ def cmake_template(package: str, node: str) -> str:
         endif()
 
         find_package(ament_cmake REQUIRED)
+        find_package(rcl_interfaces REQUIRED)
         find_package(rclcpp REQUIRED)
+        find_package(std_msgs REQUIRED)
 
         add_library(${{PROJECT_NAME}}_lib src/{node}.cpp)
         target_include_directories(${{PROJECT_NAME}}_lib PUBLIC
           $<BUILD_INTERFACE:${{CMAKE_CURRENT_SOURCE_DIR}}/include>
           $<INSTALL_INTERFACE:include/${{PROJECT_NAME}}>)
-        target_link_libraries(${{PROJECT_NAME}}_lib PUBLIC rclcpp::rclcpp)
+{link_block}
 
         add_executable({node} src/{node}_main.cpp)
         target_link_libraries({node} PRIVATE ${{PROJECT_NAME}}_lib)
@@ -163,6 +326,9 @@ def cmake_template(package: str, node: str) -> str:
 
         install(DIRECTORY include/
           DESTINATION include)
+
+        install(DIRECTORY config launch
+          DESTINATION share/${{PROJECT_NAME}})
 
         if(BUILD_TESTING)
           find_package(ament_cmake_gtest REQUIRED)
@@ -214,7 +380,12 @@ def package_xml_template(package: str) -> str:
 
           <buildtool_depend>ament_cmake</buildtool_depend>
 
+          <depend>rcl_interfaces</depend>
           <depend>rclcpp</depend>
+          <depend>std_msgs</depend>
+
+          <exec_depend>launch</exec_depend>
+          <exec_depend>launch_ros</exec_depend>
 
           <test_depend>ament_cmake_gtest</test_depend>
           <test_depend>ament_cmake_clang_format</test_depend>
@@ -228,15 +399,22 @@ def package_xml_template(package: str) -> str:
     )
 
 
-def target_files(destination_directory: pathlib.Path, package: str, node: str) -> dict[pathlib.Path, str]:
+def target_files(
+    destination_directory: pathlib.Path,
+    package: str,
+    node: str,
+    cmake_style: str,
+) -> dict[pathlib.Path, str]:
     """Return generated file paths and contents."""
     package_dir = destination_directory / package
     node_class = class_name_from_snake_case(node)
 
     return {
-        package_dir / "CMakeLists.txt": cmake_template(package, node),
+        package_dir / "CMakeLists.txt": cmake_template(package, node, cmake_style),
         package_dir / "package.xml": package_xml_template(package),
+        package_dir / "config" / "params.yaml": params_template(node),
         package_dir / "include" / package / f"{node}.hpp": header_template(package, node, node_class),
+        package_dir / "launch" / f"{node}.launch.py": launch_template(package, node),
         package_dir / "src" / f"{node}.cpp": node_template(package, node, node_class),
         package_dir / "src" / f"{node}_main.cpp": main_template(package, node, node_class),
         package_dir / "test" / f"test_{node}.cpp": test_template(package, node, node_class),
@@ -261,6 +439,7 @@ def run() -> int:
     args = parse_args()
     package = args.package
     node = args.node
+    cmake_style = args.cmake_style
     destination_directory = args.destination_directory
 
     try:
@@ -272,14 +451,16 @@ def run() -> int:
             msg = f"Package directory already exists: {package_dir}"
             raise FileExistsError(msg)
 
-        files = target_files(destination_directory, package, node)
+        files = target_files(destination_directory, package, node, cmake_style)
         write_files(files)
     except (OSError, ValueError) as error:
         sys.stderr.write(f"Error: {error}\n")
         return 1
 
     sys.stdout.write(f"Created C++ ROS package `{package}` with node `{node}` in {package_dir}\n")
+    sys.stdout.write(f"Generated CMake style: {cmake_style}\n")
     sys.stdout.write(f"Run it with: ros2 run {package} {node}\n")
+    sys.stdout.write(f"Or launch it with: ros2 launch {package} {node}.launch.py\n")
     return 0
 
 

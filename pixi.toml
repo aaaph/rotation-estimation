@@ -68,6 +68,7 @@ ros-kilted-ament-cmake-clang-format = ">=0.19.2,<0.20"
 ros-kilted-ament-cmake-clang-tidy = ">=0.19.2,<0.20"
 eigen = ">=5.0.1,<6"
 ros-kilted-tf2-msgs = ">=0.41.6,<0.42"
+ros-kilted-launch-testing-ros = ">=0.28.5,<0.29"
 
 [feature.dev-runtime]
 platforms = ["osx-arm64", "linux-64"]
