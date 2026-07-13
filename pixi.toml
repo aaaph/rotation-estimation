@@ -36,6 +36,11 @@ args = [{ arg = "mode", default = "stationary" }]
 cmd = "bash -lc 'source install/setup.bash && ros2 run sense_hat_bridge sense_hat_node --ros-args -p mock:=true -p mock_mode:={{ mode }}'"
 depends-on = ["build"]
 
+[tasks.ekf_node]
+args = [{ arg = "mode", default = "stationary" }]
+cmd = "bash -lc 'source install/setup.bash && ros2 run rotation_estimation ekf_node --ros-args -p mode:={{ mode }}'"
+depends-on = ["build"]
+
 [activation.env]
 RMW_IMPLEMENTATION = "rmw_zenoh_cpp"
 

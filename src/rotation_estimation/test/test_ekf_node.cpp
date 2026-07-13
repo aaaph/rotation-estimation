@@ -32,6 +32,8 @@ TEST(EkfNodeTest, ConvertsModeToString) {
 TEST(EkfNodeTest, ParsesModeFromString) {
   EXPECT_EQ(rotation_estimation::EkfNode::modeFromString("accel"),
             rotation_estimation::EkfNode::Mode::kAccel);
+  EXPECT_EQ(rotation_estimation::EkfNode::modeFromString("accel_update"),
+            rotation_estimation::EkfNode::Mode::kAccel);
   EXPECT_EQ(rotation_estimation::EkfNode::modeFromString("stationary"),
             rotation_estimation::EkfNode::Mode::kStationary);
   EXPECT_EQ(rotation_estimation::EkfNode::modeFromString("unknown"), std::nullopt);

@@ -11,6 +11,9 @@ namespace sense_hat_bridge {
 
 using StampFactory = std::function<builtin_interfaces::msg::Time()>;
 
+struct ImuStrategySnapshot {
+  double angular_velocity_z{0.0};
+};
 class ImuStrategy {
  public:
   ImuStrategy() = default;
@@ -19,6 +22,10 @@ class ImuStrategy {
   ImuStrategy(ImuStrategy&&) = delete;
   ImuStrategy& operator=(ImuStrategy&&) = delete;
   virtual ~ImuStrategy() = default;
+
+  [[nodiscard]] virtual ImuStrategySnapshot snapshot() const {
+    return {};
+  }
 
   virtual std::optional<sensor_msgs::msg::Imu> get_imu_message() = 0;
   virtual void close() {}

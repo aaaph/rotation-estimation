@@ -19,6 +19,7 @@ add_library(${PROJECT_NAME}_lib
   src/sense_hat_node.cpp
   src/stationary_imu_mock.cpp
   src/udp_reader_imu_strategy.cpp
+  src/yaw_oscillation_imu_mock.cpp
   src/yaw_rotation_imu_mock.cpp)
 target_include_directories(${PROJECT_NAME}_lib PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

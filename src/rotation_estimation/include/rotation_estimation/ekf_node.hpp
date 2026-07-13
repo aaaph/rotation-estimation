@@ -5,10 +5,13 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include "geometry_msgs/msg/vector3_stamped.hpp"
+#include "rcl_interfaces/msg/set_parameters_result.hpp"
 #include "rclcpp/node.hpp"
 #include "rclcpp/node_options.hpp"
+#include "rclcpp/parameter.hpp"
 #include "rclcpp/publisher.hpp"
 #include "rclcpp/subscription.hpp"
 #include "rotation_estimation/esekf.hpp"
@@ -42,6 +45,8 @@ class EkfNode final : public rclcpp::Node {
   [[nodiscard]] Mode mode() const;
 
  private:
+  rcl_interfaces::msg::SetParametersResult handleParameterUpdate(
+      const std::vector<rclcpp::Parameter>& parameters);
   void handleImuMessage(const sensor_msgs::msg::Imu& msg);
 
   Mode mode_ = kDefaultMode;
@@ -53,6 +58,7 @@ class EkfNode final : public rclcpp::Node {
   rclcpp::Publisher<geometry_msgs::msg::Vector3Stamped>::SharedPtr gyro_bias_publisher_;
   rclcpp::Publisher<geometry_msgs::msg::Vector3Stamped>::SharedPtr rotation_covariance_publisher_;
   rclcpp::Publisher<geometry_msgs::msg::Vector3Stamped>::SharedPtr gyro_bias_covariance_publisher_;
+  rclcpp::Node::OnSetParametersCallbackHandle::SharedPtr parameter_callback_handle_;
 };
 
 }  // namespace rotation_estimation

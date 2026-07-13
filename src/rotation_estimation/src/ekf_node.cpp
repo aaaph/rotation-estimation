@@ -5,6 +5,7 @@
 #include <numbers>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 #include "builtin_interfaces/msg/time.hpp"
 #include "rclcpp/qos.hpp"
@@ -71,6 +72,10 @@ EkfNode::EkfNode(const rclcpp::NodeOptions& options) : rclcpp::Node(kDefaultNode
       imu_topic, rclcpp::SensorDataQoS{},
       [this](const sensor_msgs::msg::Imu::ConstSharedPtr& msg) { handleImuMessage(*msg); });
 #endif
+  parameter_callback_handle_ =
+      add_on_set_parameters_callback([this](const std::vector<rclcpp::Parameter>& parameters) {
+        return handleParameterUpdate(parameters);
+      });
 
   const std::string active_mode{toString(mode_)};
   RCLCPP_INFO(get_logger(), "%s started in %s mode; subscribing %s, publishing %s and %s",
@@ -79,7 +84,7 @@ EkfNode::EkfNode(const rclcpp::NodeOptions& options) : rclcpp::Node(kDefaultNode
 }
 
 std::optional<EkfNode::Mode> EkfNode::modeFromString(std::string_view mode) {
-  if (mode == "accel") {
+  if (mode == "accel" || mode == "accel_update") {
     return Mode::kAccel;
   }
   if (mode == "stationary") {
@@ -100,6 +105,40 @@ std::string_view EkfNode::toString(Mode mode) {
 
 EkfNode::Mode EkfNode::mode() const {
   return mode_;
+}
+
+rcl_interfaces::msg::SetParametersResult EkfNode::handleParameterUpdate(
+    const std::vector<rclcpp::Parameter>& parameters) {
+  rcl_interfaces::msg::SetParametersResult result;
+  result.successful = true;
+
+  std::optional<Mode> next_mode;
+  for (const auto& parameter : parameters) {
+    if (parameter.get_name() != "mode") {
+      continue;
+    }
+
+    if (parameter.get_type() != rclcpp::ParameterType::PARAMETER_STRING) {
+      result.successful = false;
+      result.reason = "mode must be a string";
+      return result;
+    }
+
+    next_mode = modeFromString(parameter.as_string());
+    if (!next_mode.has_value()) {
+      result.successful = false;
+      result.reason = "mode must be one of: accel, accel_update, stationary";
+      return result;
+    }
+  }
+
+  if (next_mode.has_value() && *next_mode != mode_) {
+    mode_ = *next_mode;
+    RCLCPP_INFO(get_logger(), "%s switched to %s mode", kDefaultNodeName,
+                std::string{toString(mode_)}.c_str());
+  }
+
+  return result;
 }
 
 void EkfNode::handleImuMessage(const sensor_msgs::msg::Imu& msg) {

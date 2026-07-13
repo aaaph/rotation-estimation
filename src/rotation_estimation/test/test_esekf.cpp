@@ -131,12 +131,13 @@ TEST(ESEKFTest, UpdateRejectsAccelerationOutsideNormGate) {
 
 TEST(ESEKFTest, UpdateReducesObservableOrientationCovariance) {
   rotation_estimation::ESEKF filter{};
+  const auto initial_covariance = filter.state().covariance;
 
   filter.updateByAccel(Eigen::Vector3d{0.0, 0.0, 9.80665});
 
-  EXPECT_LT(filter.state().covariance(0, 0), 1.0);
-  EXPECT_LT(filter.state().covariance(1, 1), 1.0);
-  EXPECT_NEAR(filter.state().covariance(2, 2), 1.0, 1e-12);
+  EXPECT_LT(filter.state().covariance(0, 0), initial_covariance(0, 0));
+  EXPECT_LT(filter.state().covariance(1, 1), initial_covariance(1, 1));
+  EXPECT_NEAR(filter.state().covariance(2, 2), initial_covariance(2, 2), 1e-12);
 }
 
 TEST(ESEKFTest, UpdateKeepsCovarianceSymmetric) {
@@ -177,12 +178,13 @@ TEST(ESEKFTest, UpdateByStationaryDoesNotChangeOrientationWithUncorrelatedCovari
 
 TEST(ESEKFTest, UpdateByStationaryReducesGyroBiasCovariance) {
   rotation_estimation::ESEKF filter{};
+  const auto initial_covariance = filter.state().covariance;
 
   filter.updateByStationary(Eigen::Vector3d::Zero());
 
   for (Eigen::Index i = 0; i < 3; ++i) {
-    EXPECT_NEAR(filter.state().covariance(i, i), 1.0, 1e-12);
-    EXPECT_LT(filter.state().covariance(i + 3, i + 3), 1.0);
+    EXPECT_NEAR(filter.state().covariance(i, i), initial_covariance(i, i), 1e-12);
+    EXPECT_LT(filter.state().covariance(i + 3, i + 3), initial_covariance(i + 3, i + 3));
   }
 }
 
