@@ -1,0 +1,10 @@
+sense_hat_imu_node:
+  ros__parameters:
+    mock: false
+    mock_mode: yaw_rotation
+    mock_angular_velocity_z: 0.5
+    mock_yaw_oscillation_frequency_hz: 0.25
+    host: 127.0.0.1
+    port: 8765
+    frame_id: sensehat_link
+    topic: /sensehat/imu_raw

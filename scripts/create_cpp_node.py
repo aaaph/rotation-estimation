@@ -176,14 +176,16 @@ def launch_template(package: str, node: str) -> str:
     """Return the ROS 2 Python launch template."""
     return textwrap.dedent(
         f"""\
-        from launch import LaunchDescription
-        from launch.actions import DeclareLaunchArgument
-        from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
         from launch_ros.actions import Node
         from launch_ros.substitutions import FindPackageShare
 
+        from launch import LaunchDescription
+        from launch.actions import DeclareLaunchArgument
+        from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 
-        def generate_launch_description():
+
+        def generate_launch_description() -> LaunchDescription:
+            \"\"\"Generate the node launch description.\"\"\"
             config_file = DeclareLaunchArgument(
                 "config",
                 default_value=PathJoinSubstitution(
@@ -211,6 +213,11 @@ def launch_template(package: str, node: str) -> str:
             return LaunchDescription([config_file, use_sim_time, node])
         """
     )
+
+
+def launch_init_template() -> str:
+    """Return the launch package marker template."""
+    return ""
 
 
 def params_template(node: str) -> str:
@@ -414,6 +421,7 @@ def target_files(
         package_dir / "package.xml": package_xml_template(package),
         package_dir / "config" / "params.yaml": params_template(node),
         package_dir / "include" / package / f"{node}.hpp": header_template(package, node, node_class),
+        package_dir / "launch" / "__init__.py": launch_init_template(),
         package_dir / "launch" / f"{node}.launch.py": launch_template(package, node),
         package_dir / "src" / f"{node}.cpp": node_template(package, node, node_class),
         package_dir / "src" / f"{node}_main.cpp": main_template(package, node, node_class),

@@ -3,6 +3,7 @@ authors = ["Ivan Aphanasyev <nekaktotak2@gmail.com>"]
 channels = ["conda-forge", "robostack-kilted"]
 name = "rotation_estimation"
 platforms = ["osx-arm64", "linux-aarch64", "linux-64"]
+preview = ["pixi-build"]
 version = "0.1.0"
 
 [tasks]
@@ -27,18 +28,34 @@ test = { depends-on = ["test-py", "test-cpp"] }
 test-cpp = { cmd = "colcon test --event-handlers console_direct+ --ctest-args -LE linter", depends-on = [
     "build",
 ] }
-test-py = "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest --verbose --color=yes --log-cli-level=WARNING src"
+test-py = "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest --verbose --color=yes --log-cli-level=WARNING ."
 check = "pixi run lint && pixi run test"
 build = "colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+package = { depends-on = [
+    "package-rotation-estimation",
+    "package-sense-hat-bridge",
+    "package-bringup",
+] }
+package-rotation-estimation = "pixi publish --path src/rotation_estimation --target-dir output"
+package-sense-hat-bridge = "pixi publish --path src/sense_hat_bridge --target-dir output"
+package-bringup = "pixi publish --path src/rotation_estimation_bringup --target-dir output"
+bringup = { cmd = "bash -lc 'source install/setup.bash && ros2 launch rotation_estimation_bringup bringup.launch.py'", depends-on = [
+    "build",
+] }
+
+[tasks.bringup_mock]
+args = [{ arg = "mode", default = "stationary" }]
+cmd = "bash -lc 'source install/setup.bash && ros2 launch rotation_estimation_bringup bringup.launch.py sense_hat_mock:=true sense_hat_mock_mode:={{ mode }}'"
+depends-on = ["build"]
 
 [tasks.sense_hat_imu_mock]
 args = [{ arg = "mode", default = "stationary" }]
-cmd = "bash -lc 'source install/setup.bash && ros2 run sense_hat_bridge sense_hat_node --ros-args -p mock:=true -p mock_mode:={{ mode }}'"
+cmd = "bash -lc 'source install/setup.bash && ros2 launch sense_hat_bridge sense_hat_node.launch.py mock:=true mock_mode:={{ mode }}'"
 depends-on = ["build"]
 
 [tasks.ekf_node]
 args = [{ arg = "mode", default = "stationary" }]
-cmd = "bash -lc 'source install/setup.bash && ros2 run rotation_estimation ekf_node --ros-args -p mode:={{ mode }}'"
+cmd = "bash -lc 'source install/setup.bash && ros2 launch rotation_estimation ekf_node.launch.py mode:={{ mode }}'"
 depends-on = ["build"]
 
 [activation.env]
@@ -69,6 +86,7 @@ ros-kilted-ament-cmake-clang-tidy = ">=0.19.2,<0.20"
 eigen = ">=5.0.1,<6"
 ros-kilted-tf2-msgs = ">=0.41.6,<0.42"
 ros-kilted-launch-testing-ros = ">=0.28.5,<0.29"
+ros-kilted-launch = ">=3.8.7,<4"
 
 [feature.dev-runtime]
 platforms = ["osx-arm64", "linux-64"]
@@ -87,7 +105,7 @@ rerun = "rerun"
 
 [feature.edge-runtime.tasks]
 sense_hat_udp_reader = "env -u PYTHONPATH -u PYTHONHOME /usr/bin/python3 src/sense_hat/sense_hat_udp_publisher.py"
-sense_hat_imu = { cmd = "bash -lc 'source install/setup.bash && ros2 run sense_hat_bridge sense_hat_node'", depends-on = [
+sense_hat_imu = { cmd = "bash -lc 'source install/setup.bash && ros2 launch sense_hat_bridge sense_hat_node.launch.py'", depends-on = [
     "build",
 ] }
 

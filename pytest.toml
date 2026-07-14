@@ -1,6 +1,5 @@
 [pytest]
 minversion = "9.0"
-testpaths = ["src", "tests"]
-pythonpath = ["src"]
+testpaths = ["src", "tests", "scripts"]
+pythonpath = ["src", "scripts"]
 log_level = "INFO"
-norecursedirs = ["src/my_custom_package/test"]

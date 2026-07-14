@@ -1,0 +1,9 @@
+ekf_node:
+  ros__parameters:
+    mode: accel
+    imu_topic: /sensehat/imu_raw
+    tf_topic: /tf
+    gyro_bias_topic: /rotation_estimation/gyro_bias
+    rotation_covariance_topic: /rotation_estimation/debug/rotation_covariance
+    gyro_bias_covariance_topic: /rotation_estimation/debug/gyro_bias_covariance
+    world_frame_id: world

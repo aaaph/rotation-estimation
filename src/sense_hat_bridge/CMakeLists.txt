@@ -10,6 +10,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
+find_package(rcl_interfaces REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 
@@ -25,6 +26,7 @@ target_include_directories(${PROJECT_NAME}_lib PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
 target_link_libraries(${PROJECT_NAME}_lib PUBLIC
+  ${rcl_interfaces_TARGETS}
   rclcpp::rclcpp
   sensor_msgs::sensor_msgs_library)
 
@@ -39,10 +41,14 @@ install(TARGETS ${PROJECT_NAME}_lib sense_hat_node
 install(DIRECTORY include/
   DESTINATION include)
 
+install(DIRECTORY config launch
+  DESTINATION share/${PROJECT_NAME})
+
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   find_package(ament_cmake_clang_format REQUIRED)
   find_package(ament_cmake_clang_tidy REQUIRED)
+  find_package(launch_testing_ament_cmake REQUIRED)
 
   set(REPOSITORY_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../..")
   set(CLANG_FORMAT_CONFIG "${REPOSITORY_ROOT}/.clang-format")
@@ -70,6 +76,9 @@ if(BUILD_TESTING)
 
   ament_add_gtest(test_imu_strategies test/test_imu_strategies.cpp)
   target_link_libraries(test_imu_strategies ${PROJECT_NAME}_lib)
+
+  add_launch_test(test/launch_test_sense_hat_node.launch.py
+    TIMEOUT 30)
 endif()
 
 ament_package()

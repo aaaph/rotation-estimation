@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "builtin_interfaces/msg/time.hpp"
+#include "rcl_interfaces/msg/parameter_descriptor.hpp"
 #include "rclcpp/qos.hpp"
 
 namespace rotation_estimation {
@@ -36,20 +37,36 @@ Eigen::Vector3d linearAccelerationFrom(const sensor_msgs::msg::Imu& msg) {
   };
 }
 
+rcl_interfaces::msg::ParameterDescriptor stringParameterDescriptor(const std::string& description) {
+  auto descriptor = rcl_interfaces::msg::ParameterDescriptor{};
+  descriptor.description = description;
+  return descriptor;
+}
+
 }  // namespace
 
 EkfNode::EkfNode(const rclcpp::NodeOptions& options) : rclcpp::Node(kDefaultNodeName, options) {
-  const auto mode_name =
-      declare_parameter<std::string>("mode", std::string{toString(kDefaultMode)});
-  const auto imu_topic = declare_parameter<std::string>("imu_topic", kDefaultImuTopic);
-  const auto tf_topic = declare_parameter<std::string>("tf_topic", kDefaultTfTopic);
-  const auto rotation_covariance_topic =
-      declare_parameter<std::string>("rotation_covariance_topic", kDefaultRotationCovarianceTopic);
-  const auto gyro_bias_covariance_topic =
-      declare_parameter<std::string>("gyro_bias_covariance_topic", kDefaultGyroBiasCovarianceTopic);
+  const auto mode_name = declare_parameter<std::string>(
+      "mode", std::string{toString(kDefaultMode)},
+      stringParameterDescriptor("Filter update mode: accel, accel_update, or stationary."));
+  const auto imu_topic =
+      declare_parameter<std::string>("imu_topic", std::string{kDefaultImuTopic},
+                                     stringParameterDescriptor("Input sensor_msgs/msg/Imu topic."));
+  const auto tf_topic = declare_parameter<std::string>(
+      "tf_topic", std::string{kDefaultTfTopic},
+      stringParameterDescriptor("Output tf2_msgs/msg/TFMessage topic."));
+  const auto rotation_covariance_topic = declare_parameter<std::string>(
+      "rotation_covariance_topic", std::string{kDefaultRotationCovarianceTopic},
+      stringParameterDescriptor("Output rotation covariance debug topic."));
+  const auto gyro_bias_covariance_topic = declare_parameter<std::string>(
+      "gyro_bias_covariance_topic", std::string{kDefaultGyroBiasCovarianceTopic},
+      stringParameterDescriptor("Output gyro bias covariance debug topic."));
   const auto gyro_bias_topic =
-      declare_parameter<std::string>("gyro_bias_topic", kDefaultGyroBiasTopic);
-  world_frame_id_ = declare_parameter<std::string>("world_frame_id", kDefaultWorldFrameId);
+      declare_parameter<std::string>("gyro_bias_topic", std::string{kDefaultGyroBiasTopic},
+                                     stringParameterDescriptor("Output gyro bias debug topic."));
+  world_frame_id_ = declare_parameter<std::string>(
+      "world_frame_id", std::string{kDefaultWorldFrameId},
+      stringParameterDescriptor("Fixed world frame id used for the published transform."));
 
   const auto parsed_mode = modeFromString(mode_name);
   if (!parsed_mode.has_value()) {

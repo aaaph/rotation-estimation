@@ -25,7 +25,6 @@ exclude = [
     "dist",
     "node_modules",
     "site-packages",
-    "src/my_custom_package",
     "venv",
 ]
 
@@ -36,7 +35,6 @@ extend-include = ["*.ipynb"]
 line-length = 115
 indent-width = 4
 
-# Assume Python 3.9
 target-version = "py312"
 
 [lint]
@@ -82,6 +80,7 @@ line-ending = "auto"
 [lint.per-file-ignores]
 # ignore unused imports in __init__.py files
 "__init__.py" = ["F401"]
+"*.launch.py" = ["N999"]
 "test_*.py" = [
     "ANN",     # Ignore Annotation rules in tests
     "S101",    # asserts allowed in tests...
@@ -91,6 +90,16 @@ line-ending = "auto"
     "S311",    # Standard pseudo-random generators are not suitable for cryptographic purposes
     "D103",    # Missing docstring in public function
 ]
+"launch_test*.py" = [
+    "ANN",     # Ignore Annotation rules in tests
+    "S101",    # asserts allowed in tests...
+    "ARG",     # Unused function args -> fixtures nevertheless are functionally relevant...
+    "FBT",     # Don't care about booleans as positional arguments in tests, e.g. via @pytest.mark.parametrize()
+    "PLR2004", # Magic value used in comparison, ...
+    "S311",    # Standard pseudo-random generators are not suitable for cryptographic purposes
+    "D103",    # Missing docstring in public function
+    "N999",    # Launch test files may keep the ROS .launch.py suffix.
+]
 
 [lint.isort]
-known-third-party = ["pydbow3"]
+known-third-party = []

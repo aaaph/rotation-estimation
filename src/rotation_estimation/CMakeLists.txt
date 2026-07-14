@@ -11,6 +11,7 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(rcl_interfaces REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(tf2_msgs REQUIRED)
@@ -22,6 +23,7 @@ target_include_directories(${PROJECT_NAME}_lib PUBLIC
   $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
 target_link_libraries(${PROJECT_NAME}_lib PUBLIC
   ${geometry_msgs_TARGETS}
+  ${rcl_interfaces_TARGETS}
   ${sensor_msgs_TARGETS}
   ${tf2_msgs_TARGETS}
   sensor_msgs::sensor_msgs_library
@@ -38,6 +40,9 @@ install(TARGETS ${PROJECT_NAME}_lib ekf_node
 
 install(DIRECTORY include/
   DESTINATION include)
+
+install(DIRECTORY config launch
+  DESTINATION share/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)

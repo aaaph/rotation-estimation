@@ -1,11 +1,13 @@
 #include "sense_hat_bridge/sense_hat_node.hpp"
 
 #include <chrono>
+#include <cstdint>
 #include <exception>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "rcl_interfaces/msg/parameter_descriptor.hpp"
 #include "rclcpp/qos.hpp"
 #include "sense_hat_bridge/imu_strategy_factory.hpp"
 
@@ -14,6 +16,16 @@ namespace {
 
 constexpr double kMockRateHz = 50.0;
 constexpr double kUdpPollPeriodS = 0.001;
+
+struct DoubleRange {
+  double from_value;
+  double to_value;
+};
+
+struct IntegerRange {
+  int64_t from_value;
+  int64_t to_value;
+};
 
 rcl_interfaces::msg::SetParametersResult SuccessfulParameterUpdate() {
   rcl_interfaces::msg::SetParametersResult result;
@@ -28,18 +40,57 @@ rcl_interfaces::msg::SetParametersResult FailedParameterUpdate(const std::string
   return result;
 }
 
+rcl_interfaces::msg::ParameterDescriptor parameterDescriptor(const std::string& description) {
+  auto descriptor = rcl_interfaces::msg::ParameterDescriptor{};
+  descriptor.description = description;
+  return descriptor;
+}
+
+rcl_interfaces::msg::ParameterDescriptor doubleParameterDescriptor(const std::string& description,
+                                                                   DoubleRange range) {
+  auto descriptor = parameterDescriptor(description);
+  descriptor.floating_point_range.resize(1);
+  descriptor.floating_point_range[0].from_value = range.from_value;
+  descriptor.floating_point_range[0].to_value = range.to_value;
+  descriptor.floating_point_range[0].step = 0.0;
+  return descriptor;
+}
+
+rcl_interfaces::msg::ParameterDescriptor integerParameterDescriptor(const std::string& description,
+                                                                    IntegerRange range) {
+  auto descriptor = parameterDescriptor(description);
+  descriptor.integer_range.resize(1);
+  descriptor.integer_range[0].from_value = range.from_value;
+  descriptor.integer_range[0].to_value = range.to_value;
+  descriptor.integer_range[0].step = 1;
+  return descriptor;
+}
+
 }  // namespace
 
 SenseHatNode::SenseHatNode(const rclcpp::NodeOptions& options)
     : rclcpp::Node(kDefaultNodeName, options) {
-  declare_parameter("mock", false);
-  declare_parameter("mock_mode", std::string{kMockModeYawRotation});
-  declare_parameter("mock_angular_velocity_z", 0.5);
-  declare_parameter("mock_yaw_oscillation_frequency_hz", 0.25);
-  declare_parameter("host", "127.0.0.1");
-  declare_parameter("port", 8765);
-  declare_parameter("frame_id", "sensehat_link");
-  declare_parameter("topic", "/sensehat/imu_raw");
+  declare_parameter("mock", false,
+                    parameterDescriptor("Use generated IMU mock data instead of UDP input."));
+  declare_parameter(
+      "mock_mode", std::string{kMockModeYawRotation},
+      parameterDescriptor("Mock mode: stationary, yaw_rotation, or yaw_oscillation."));
+  declare_parameter(
+      "mock_angular_velocity_z", 0.5,
+      doubleParameterDescriptor("Mock angular velocity around Z in rad/s.",
+                                DoubleRange{.from_value = -1000.0, .to_value = 1000.0}));
+  declare_parameter(
+      "mock_yaw_oscillation_frequency_hz", 0.25,
+      doubleParameterDescriptor("Yaw oscillation frequency in Hz.",
+                                DoubleRange{.from_value = 0.001, .to_value = 1000.0}));
+  declare_parameter("host", std::string{"127.0.0.1"}, parameterDescriptor("UDP IMU source host."));
+  declare_parameter("port", 8765,
+                    integerParameterDescriptor("UDP IMU source port.",
+                                               IntegerRange{.from_value = 1, .to_value = 65535}));
+  declare_parameter("frame_id", std::string{"sensehat_link"},
+                    parameterDescriptor("Frame id assigned to published IMU messages."));
+  declare_parameter("topic", std::string{"/sensehat/imu_raw"},
+                    parameterDescriptor("Output sensor_msgs/msg/Imu topic."));
 
   const auto topic = get_parameter("topic").as_string();
 

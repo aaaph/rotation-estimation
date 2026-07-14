@@ -14,6 +14,9 @@ build/
 install/
 log/
 
+# Local Pixi package artifacts.
+output/
+
 # Local IDE profile; activate one of .vscode/settings.*.example.json.
 !.vscode/
 !.vscode/settings.*.example.json
