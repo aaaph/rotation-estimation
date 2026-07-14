@@ -81,6 +81,9 @@ if(BUILD_TESTING)
     TIMEOUT 30
     APPEND_ENV "AMENT_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}"
     APPEND_LIBRARY_DIRS "${CMAKE_INSTALL_PREFIX}/lib")
+
+  set_tests_properties(test_launch_test_sense_hat_node.launch.py
+    PROPERTIES ENVIRONMENT "RMW_IMPLEMENTATION=rmw_fastrtps_cpp")
 endif()
 
 ament_package()
