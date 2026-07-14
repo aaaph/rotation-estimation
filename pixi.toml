@@ -25,7 +25,7 @@ lint-cpp = { cmd = "colcon test --event-handlers console_direct+ --ctest-args -L
 ] }
 lint-py = "ruff check . && ty check --exclude 'src/my_custom_package/**'"
 test = { depends-on = ["test-py", "test-cpp"] }
-test-cpp = { cmd = "colcon test --event-handlers console_direct+ --ctest-args -LE linter", depends-on = [
+test-cpp = { cmd = "bash -c 'colcon test --event-handlers console_cohesion+ --ctest-args -LE linter --output-on-failure; test_code=$?; colcon test-result --verbose; result_code=$?; if [ $test_code -ne 0 ]; then exit $test_code; fi; exit $result_code'", depends-on = [
     "build",
 ] }
 test-py = "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest --verbose --color=yes --log-cli-level=WARNING ."
