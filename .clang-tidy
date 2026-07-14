@@ -1,4 +1,5 @@
 ---
+# Keep broad check families enabled, then opt out of noisy style/version-skew checks.
 Checks: >
   -*,
   bugprone-*,
@@ -13,14 +14,17 @@ Checks: >
   -cppcoreguidelines-macro-usage,
   -cppcoreguidelines-owning-memory,
   -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,
   -cppcoreguidelines-pro-bounds-constant-array-index,
   -cppcoreguidelines-pro-bounds-pointer-arithmetic,
   -cppcoreguidelines-pro-type-reinterpret-cast,
   -cppcoreguidelines-pro-type-union-access,
   -modernize-use-trailing-return-type,
+  -portability-avoid-pragma-once,
   -readability-identifier-length,
   -readability-magic-numbers,
-  -readability-named-parameter
+  -readability-named-parameter,
+  -readability-use-concise-preprocessor-directives
 
 WarningsAsErrors: ""
 HeaderFilterRegex: "src/.*"
