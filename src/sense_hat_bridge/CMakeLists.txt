@@ -78,7 +78,9 @@ if(BUILD_TESTING)
   target_link_libraries(test_imu_strategies ${PROJECT_NAME}_lib)
 
   add_launch_test(test/launch_test_sense_hat_node.launch.py
-    TIMEOUT 30)
+    TIMEOUT 30
+    APPEND_ENV "AMENT_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}"
+    APPEND_LIBRARY_DIRS "${CMAKE_INSTALL_PREFIX}/lib")
 endif()
 
 ament_package()
