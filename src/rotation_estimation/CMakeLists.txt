@@ -48,6 +48,7 @@ if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   find_package(ament_cmake_clang_format REQUIRED)
   find_package(ament_cmake_clang_tidy REQUIRED)
+  find_package(launch_testing_ament_cmake REQUIRED)
 
   set(REPOSITORY_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../..")
   set(CLANG_FORMAT_CONFIG "${REPOSITORY_ROOT}/.clang-format")
@@ -75,6 +76,14 @@ if(BUILD_TESTING)
 
   ament_add_gtest(test_esekf test/test_esekf.cpp)
   target_link_libraries(test_esekf ${PROJECT_NAME}_lib)
+
+  add_launch_test(test/launch_test_ekf_node.launch.py
+    TIMEOUT 30
+    APPEND_ENV "AMENT_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}"
+    APPEND_LIBRARY_DIRS "${CMAKE_INSTALL_PREFIX}/lib")
+
+  set_tests_properties(test_launch_test_ekf_node.launch.py
+    PROPERTIES ENVIRONMENT "RMW_IMPLEMENTATION=rmw_fastrtps_cpp")
 endif()
 
 ament_package()
