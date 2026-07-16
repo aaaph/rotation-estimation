@@ -4,7 +4,7 @@
 #include "rclcpp/utilities.hpp"
 #include "rotation_estimation_bringup/manager_node.hpp"
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv) {  // NOLINT(bugprone-exception-escape)
   rclcpp::init(argc, argv);
   auto node = std::make_shared<rotation_estimation_bringup::ManagerNode>();
   rclcpp::spin(node);

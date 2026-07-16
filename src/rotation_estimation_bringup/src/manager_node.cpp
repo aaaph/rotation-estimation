@@ -33,6 +33,7 @@ ManagerNode::ManagerNode(const rclcpp::NodeOptions& options)
     throw std::invalid_argument("Invalid system mode: " + system_mode_arg);
   }
 
+  // rclcpp requires service callback shared pointers to be passed by value.
   // NOLINTBEGIN(performance-unnecessary-value-param)
   set_system_mode_service_ = create_service<SetSystemMode>(
       "~/set_system_mode", [this](SetSystemMode::Request::SharedPtr request,
