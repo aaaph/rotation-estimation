@@ -107,8 +107,14 @@ if(BUILD_TESTING)
 
   add_launch_test(test/launch_test_bringup_stationary_identity.launch.py
     TIMEOUT 40
-    APPEND_ENV "AMENT_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}"
-    APPEND_LIBRARY_DIRS "${CMAKE_INSTALL_PREFIX}/lib")
+    APPEND_ENV
+      "AMENT_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}"
+      "AMENT_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}/../sense_hat_bridge"
+      "AMENT_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}/../rotation_estimation"
+    APPEND_LIBRARY_DIRS
+      "${CMAKE_INSTALL_PREFIX}/lib"
+      "${CMAKE_INSTALL_PREFIX}/../sense_hat_bridge/lib"
+      "${CMAKE_INSTALL_PREFIX}/../rotation_estimation/lib")
 
   set_tests_properties(
     test_launch_test_manager_node.launch.py
