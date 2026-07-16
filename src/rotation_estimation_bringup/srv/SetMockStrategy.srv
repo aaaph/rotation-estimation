@@ -1,0 +1,7 @@
+# Request
+string strategy
+---
+# Response
+bool success
+string active_strategy
+string message

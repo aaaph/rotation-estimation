@@ -44,6 +44,7 @@ install(DIRECTORY config launch
   DESTINATION share/${PROJECT_NAME})
 
 rosidl_generate_interfaces(${PROJECT_NAME}
+  srv/SetMockStrategy.srv
   srv/SetSystemMode.srv)
 
 get_property(PACKAGE_TARGETS DIRECTORY PROPERTY BUILDSYSTEM_TARGETS)
@@ -104,7 +105,14 @@ if(BUILD_TESTING)
     APPEND_ENV "AMENT_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}"
     APPEND_LIBRARY_DIRS "${CMAKE_INSTALL_PREFIX}/lib")
 
-  set_tests_properties(test_launch_test_manager_node.launch.py
+  add_launch_test(test/launch_test_bringup_stationary_identity.launch.py
+    TIMEOUT 40
+    APPEND_ENV "AMENT_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}"
+    APPEND_LIBRARY_DIRS "${CMAKE_INSTALL_PREFIX}/lib")
+
+  set_tests_properties(
+    test_launch_test_manager_node.launch.py
+    test_launch_test_bringup_stationary_identity.launch.py
     PROPERTIES ENVIRONMENT "${TEST_ROS_ENVIRONMENT}")
 endif()
 

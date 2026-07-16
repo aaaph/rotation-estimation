@@ -1,3 +1,5 @@
 manager_node:
   ros__parameters:
     system_mode: stationary
+    mock_imu: false
+    mobile_mock_strategy: yaw_rotation
