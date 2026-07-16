@@ -1,9 +1,72 @@
+from enum import StrEnum
+
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
-from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
+from launch import LaunchContext, LaunchDescription
+from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+
+
+class SystemMode(StrEnum):
+    """System mode enum."""
+
+    STATIONARY = "stationary"
+    MOBILE = "mobile"
+
+
+def get_ekf_node_mode_from_system_mode(system_mode: SystemMode) -> str:
+    """Get the EKF node mode from the system mode."""
+    return "stationary" if system_mode == SystemMode.STATIONARY else "accel"
+
+
+def get_sense_hat_node_mode_from_system_mode(system_mode: SystemMode) -> str:
+    """Get the Sense HAT node mode from the system mode."""
+    return "stationary" if system_mode == SystemMode.STATIONARY else "yaw_rotation"
+
+
+def launch_nodes(context: LaunchContext) -> list[Node]:
+    """Create nodes after launch arguments have been resolved."""
+    system_mode = SystemMode(LaunchConfiguration("system_mode").perform(context))
+
+    sense_hat_node = Node(
+        package="sense_hat_bridge",
+        executable="sense_hat_node",
+        name="sense_hat_imu_node",
+        output="screen",
+        parameters=[
+            LaunchConfiguration("sense_hat_config"),
+            {"mock": LaunchConfiguration("sense_hat_mock")},
+            {"mock_mode": get_sense_hat_node_mode_from_system_mode(system_mode)},
+            {"use_sim_time": LaunchConfiguration("use_sim_time")},
+        ],
+    )
+
+    ekf_node = Node(
+        package="rotation_estimation",
+        executable="ekf_node",
+        name="ekf_node",
+        output="screen",
+        parameters=[
+            LaunchConfiguration("ekf_config"),
+            {"mode": get_ekf_node_mode_from_system_mode(system_mode)},
+            {"use_sim_time": LaunchConfiguration("use_sim_time")},
+        ],
+    )
+
+    manager_node = Node(
+        package="rotation_estimation_bringup",
+        executable="manager_node",
+        name="manager_node",
+        output="screen",
+        parameters=[
+            LaunchConfiguration("manager_config"),
+            {"system_mode": system_mode.value},
+            {"use_sim_time": LaunchConfiguration("use_sim_time")},
+        ],
+    )
+
+    return [sense_hat_node, ekf_node, manager_node]
 
 
 def generate_launch_description() -> LaunchDescription:
@@ -23,39 +86,24 @@ def generate_launch_description() -> LaunchDescription:
         default_value="false",
         description="Run the Sense HAT bridge with a synthetic IMU source.",
     )
-    sense_hat_mock_mode = DeclareLaunchArgument(
-        "sense_hat_mock_mode",
-        default_value="yaw_rotation",
-        description="Synthetic IMU mode used when sense_hat_mock is true.",
-    )
     ekf_config = DeclareLaunchArgument(
         "ekf_config",
         default_value=PathJoinSubstitution([FindPackageShare("rotation_estimation"), "config", "params.yaml"]),
         description="Path to the rotation estimator parameter file.",
     )
-
-    sense_hat_node = Node(
-        package="sense_hat_bridge",
-        executable="sense_hat_node",
-        name="sense_hat_imu_node",
-        output="screen",
-        parameters=[
-            LaunchConfiguration("sense_hat_config"),
-            {"mock": LaunchConfiguration("sense_hat_mock")},
-            {"mock_mode": LaunchConfiguration("sense_hat_mock_mode")},
-            {"use_sim_time": LaunchConfiguration("use_sim_time")},
-        ],
+    manager_config = DeclareLaunchArgument(
+        "manager_config",
+        default_value=PathJoinSubstitution(
+            [FindPackageShare("rotation_estimation_bringup"), "config", "params.yaml"]
+        ),
+        description="Path to the manager parameter file.",
     )
 
-    ekf_node = Node(
-        package="rotation_estimation",
-        executable="ekf_node",
-        name="ekf_node",
-        output="screen",
-        parameters=[
-            LaunchConfiguration("ekf_config"),
-            {"use_sim_time": LaunchConfiguration("use_sim_time")},
-        ],
+    system_mode = DeclareLaunchArgument(
+        "system_mode",
+        default_value=SystemMode.STATIONARY.value,
+        description="System mode.",
+        choices=[mode.value for mode in SystemMode],
     )
 
     return LaunchDescription(
@@ -63,9 +111,9 @@ def generate_launch_description() -> LaunchDescription:
             use_sim_time,
             sense_hat_config,
             sense_hat_mock,
-            sense_hat_mock_mode,
             ekf_config,
-            sense_hat_node,
-            ekf_node,
+            manager_config,
+            system_mode,
+            OpaqueFunction(function=launch_nodes),
         ]
     )
