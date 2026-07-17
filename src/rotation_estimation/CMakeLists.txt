@@ -17,7 +17,10 @@ find_package(sensor_msgs REQUIRED)
 find_package(tf2_msgs REQUIRED)
 find_package(Eigen3 REQUIRED)
 
-add_library(${PROJECT_NAME}_lib src/ekf_node.cpp src/esekf.cpp)
+add_library(${PROJECT_NAME}_lib
+  src/ekf_node.cpp
+  src/esekf.cpp
+  src/gyro_bias_sliding_window.cpp)
 target_include_directories(${PROJECT_NAME}_lib PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
@@ -76,6 +79,9 @@ if(BUILD_TESTING)
 
   ament_add_gtest(test_esekf test/test_esekf.cpp)
   target_link_libraries(test_esekf ${PROJECT_NAME}_lib)
+
+  ament_add_gtest(test_gyro_bias_sliding_window test/test_gyro_bias_sliding_window.cpp)
+  target_link_libraries(test_gyro_bias_sliding_window ${PROJECT_NAME}_lib)
 
   add_launch_test(test/launch_test_ekf_node.launch.py
     TIMEOUT 30

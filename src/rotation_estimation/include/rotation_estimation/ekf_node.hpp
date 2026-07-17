@@ -15,6 +15,7 @@
 #include "rclcpp/publisher.hpp"
 #include "rclcpp/subscription.hpp"
 #include "rotation_estimation/esekf.hpp"
+#include "rotation_estimation/gyro_bias_sliding_window.hpp"
 #include "sensor_msgs/msg/imu.hpp"
 #include "tf2_msgs/msg/tf_message.hpp"
 
@@ -51,6 +52,7 @@ class EkfNode final : public rclcpp::Node {
 
   Mode mode_ = kDefaultMode;
   ESEKF filter_;
+  GyroBiasSlidingWindow gyro_bias_window_;
   std::string world_frame_id_ = kDefaultWorldFrameId;
   std::optional<int64_t> first_imu_stamp_ns_;
   rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_subscription_;

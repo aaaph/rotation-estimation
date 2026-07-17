@@ -98,6 +98,25 @@ TEST(ESEKFTest, PredictAddsGyroBiasRandomWalkToBiasCovariance) {
   }
 }
 
+TEST(ESEKFTest, FrozenGyroBiasDoesNotRandomWalkDuringPredict) {
+  rotation_estimation::ESEKFConfig config{};
+  config.gyro_noise_std = 0.0;
+  config.gyro_bias_random_walk_std = 0.04;
+
+  rotation_estimation::ESEKFState state{};
+  state.covariance.setZero();
+
+  rotation_estimation::ESEKF filter{config};
+  filter.reset(state);
+  filter.setGyroBiasFrozen(true);
+  filter.predict(Eigen::Vector3d::Zero(), kOneSecondNs);
+
+  EXPECT_TRUE(filter.gyroBiasFrozen());
+  for (Eigen::Index i = 3; i < 6; ++i) {
+    EXPECT_NEAR(filter.state().covariance(i, i), 0.0, 1e-12);
+  }
+}
+
 TEST(ESEKFTest, UpdateWithGravityAlignedAccelerationKeepsIdentityOrientation) {
   rotation_estimation::ESEKF filter{};
 
@@ -147,6 +166,21 @@ TEST(ESEKFTest, UpdateKeepsCovarianceSymmetric) {
 
   const auto asymmetry = filter.state().covariance - filter.state().covariance.transpose();
   EXPECT_NEAR(asymmetry.norm(), 0.0, 1e-12);
+}
+
+TEST(ESEKFTest, FrozenGyroBiasIsNotChangedByAccelUpdate) {
+  rotation_estimation::ESEKFConfig config{};
+  const Eigen::Vector3d bias{0.01, -0.02, 0.03};
+  rotation_estimation::ESEKF filter{config};
+  filter.setGyroBias(bias);
+  filter.setGyroBiasFrozen(true);
+  filter.predict(bias, kOneSecondNs);
+
+  const Eigen::Quaterniond tilted{Eigen::AngleAxisd{0.2, Eigen::Vector3d::UnitX()}};
+  const Eigen::Vector3d accel = config.g * (tilted.inverse() * Eigen::Vector3d::UnitZ());
+  filter.updateByAccel(accel);
+
+  EXPECT_TRUE(filter.state().gyro_bias.isApprox(bias));
 }
 
 TEST(ESEKFTest, UpdateByStationaryMovesGyroBiasTowardMeasuredGyro) {

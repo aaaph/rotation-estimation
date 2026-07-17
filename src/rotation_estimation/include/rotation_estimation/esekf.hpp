@@ -28,6 +28,9 @@ class ESEKF {
   [[nodiscard]] const ESEKFState& state() const;
   [[nodiscard]] int64_t timestamp_ns() const;
   void reset(const ESEKFState& state);
+  void setGyroBias(const Eigen::Vector3d& gyro_bias);
+  void setGyroBiasFrozen(bool frozen);
+  [[nodiscard]] bool gyroBiasFrozen() const;
   void predict(const Eigen::Vector3d& gyro, int64_t timestamp_ns_next);
   void updateByAccel(const Eigen::Vector3d& accel);
   void updateByStationary(const Eigen::Vector3d& gyro);
@@ -37,6 +40,7 @@ class ESEKF {
   ESEKFConfig options_;
   ESEKFState state_;
   int64_t timestamp_ns_ = 0LL;
+  bool gyro_bias_frozen_ = false;
 };
 
 }  // namespace rotation_estimation

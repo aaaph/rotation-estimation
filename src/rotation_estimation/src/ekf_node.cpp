@@ -150,6 +150,19 @@ rcl_interfaces::msg::SetParametersResult EkfNode::handleParameterUpdate(
   }
 
   if (next_mode.has_value() && *next_mode != mode_) {
+    if (mode_ == Mode::kStationary && *next_mode == Mode::kAccel) {
+      const auto mean_bias = gyro_bias_window_.mean();
+      if (mean_bias.has_value()) {
+        filter_.setGyroBias(*mean_bias);
+      } else {
+        RCLCPP_WARN(get_logger(), "gyro bias window is empty; freezing the current estimate");
+      }
+      filter_.setGyroBiasFrozen(true);
+    } else if (mode_ == Mode::kAccel && *next_mode == Mode::kStationary) {
+      filter_.setGyroBiasFrozen(false);
+      gyro_bias_window_.clear();
+    }
+
     mode_ = *next_mode;
     RCLCPP_INFO(get_logger(), "%s switched to %s mode", kDefaultNodeName,
                 std::string{toString(mode_)}.c_str());
@@ -172,6 +185,7 @@ void EkfNode::handleImuMessage(const sensor_msgs::msg::Imu& msg) {
   filter_.updateByAccel(accel);
   if (mode_ == Mode::kStationary) {
     filter_.updateByStationary(gyro);
+    gyro_bias_window_.add(filter_stamp_ns, filter_.state().gyro_bias);
   }
 
   const auto& state = filter_.state();

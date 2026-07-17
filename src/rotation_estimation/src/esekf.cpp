@@ -69,6 +69,18 @@ void ESEKF::reset(const ESEKFState& state) {
   state_.q.normalize();
 }
 
+void ESEKF::setGyroBias(const Eigen::Vector3d& gyro_bias) {
+  state_.gyro_bias = gyro_bias;
+}
+
+void ESEKF::setGyroBiasFrozen(bool frozen) {
+  gyro_bias_frozen_ = frozen;
+}
+
+bool ESEKF::gyroBiasFrozen() const {
+  return gyro_bias_frozen_;
+}
+
 Eigen::Matrix<double, 6, 1> ESEKF::covariance_diagonal() const {
   return state_.covariance.diagonal();
 }
@@ -94,8 +106,10 @@ void ESEKF::predict(const Eigen::Vector3d& gyro, int64_t timestamp_ns_next) {
 
   Matrix6d Qc = Matrix6d::Zero();
   Qc.block<3, 3>(0, 0) = std::pow(options_.gyro_noise_std, 2) * Eigen::Matrix3d::Identity();
-  Qc.block<3, 3>(3, 3) =
-      std::pow(options_.gyro_bias_random_walk_std, 2) * Eigen::Matrix3d::Identity();
+  if (!gyro_bias_frozen_) {
+    Qc.block<3, 3>(3, 3) =
+        std::pow(options_.gyro_bias_random_walk_std, 2) * Eigen::Matrix3d::Identity();
+  }
 
   const Matrix6d F = Matrix6d::Identity() + Fc * dt;
   const Matrix6d Qd = Gc * Qc * Gc.transpose() * dt;
@@ -132,7 +146,10 @@ void ESEKF::updateByAccel(const Eigen::Vector3d& accel) {
   }
 
   const Matrix6x3d PHT = state_.covariance * H.transpose();
-  const Matrix6x3d K = solver.solve(PHT.transpose()).transpose();
+  Matrix6x3d K = solver.solve(PHT.transpose()).transpose();
+  if (gyro_bias_frozen_) {
+    K.bottomRows<3>().setZero();
+  }
   const Vector6d correction = K * residual;
 
   const Eigen::Quaterniond dq = Eigen::Quaterniond(ExpSO3Matrix(correction.head<3>()));
@@ -160,7 +177,10 @@ void ESEKF::updateByStationary(const Eigen::Vector3d& gyro) {
   }
 
   const Matrix6x3d PHT = state_.covariance * H.transpose();
-  const Matrix6x3d K = solver.solve(PHT.transpose()).transpose();
+  Matrix6x3d K = solver.solve(PHT.transpose()).transpose();
+  if (gyro_bias_frozen_) {
+    K.bottomRows<3>().setZero();
+  }
 
   const Vector6d correction = K * residual;
 
