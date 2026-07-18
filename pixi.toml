@@ -10,6 +10,7 @@ version = "0.1.0"
 "ide:dev-runtime" = { cmd = "./scripts/activate-ide-profile.sh dev-runtime", default-environment = "dev-runtime" }
 "ide:edge-runtime" = { cmd = "./scripts/activate-ide-profile.sh edge-runtime", default-environment = "edge-runtime" }
 zenohd = "./scripts/run-zenohd.sh"
+ros2 = "bash scripts/run-ros2-workspace.sh"
 heartbeat_listener = "ros2 topic echo /m1_heartbeat"
 heartbeat_publisher = "ros2 topic pub /m1_heartbeat std_msgs/msg/Int32 '{data: 1}' --rate 1"
 new-cpp-node = { args = [
@@ -44,8 +45,11 @@ bringup = { cmd = "bash -lc 'source install/setup.bash && ros2 launch rotation_e
 ] }
 
 [tasks.bringup_mock]
-args = [{ arg = "mode", default = "stationary" }]
-cmd = "bash -lc 'source install/setup.bash && ros2 launch rotation_estimation_bringup bringup.launch.py sense_hat_mock:=true sense_hat_mock_mode:={{ mode }}'"
+args = [
+    { arg = "mode", default = "stationary" },
+    { arg = "strategy", default = "yaw_rotation" },
+]
+cmd = "bash -lc 'source install/setup.bash && ros2 launch rotation_estimation_bringup bringup.launch.py sense_hat_mock:=true system_mode:={{ mode }} mobile_mock_strategy:={{ strategy }}'"
 depends-on = ["build"]
 
 [tasks.sense_hat_imu_mock]
